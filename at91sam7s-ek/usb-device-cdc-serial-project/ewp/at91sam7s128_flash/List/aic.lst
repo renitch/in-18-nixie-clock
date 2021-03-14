@@ -1,0 +1,195 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\peripherals\irq\ai #
+#                    c.c                                                      #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\peripherals\irq\ai #
+#                    c.c -D at91sam7s128 -D flash -D TRACE_LEVEL=3 -lC        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\ --remarks  #
+#                    --diag_suppress Pe826,Pe1375 -o                          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\aic.lst     #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\aic.o        #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\peripherals\irq\aic.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include <board.h>
+     35          #include "irq.h"
+     36          
+     37          #ifndef AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL
+     38              /// Interrupt is internal and uses a logical 1 level.
+     39              #define AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL AT91C_AIC_SRCTYPE_INT_LEVEL_SENSITIVE
+     40          #endif
+     41          
+     42          //------------------------------------------------------------------------------
+     43          //         Global functions
+     44          //------------------------------------------------------------------------------
+     45          
+     46          //------------------------------------------------------------------------------
+     47          /// Configures an interrupt in the AIC. The interrupt is identified by its
+     48          /// source (AT91C_ID_xxx) and is configured to use the specified mode and
+     49          /// interrupt handler function. Mode is the value that will be put in AIC_SMRx
+     50          /// and the function address will be set in AIC_SVRx.
+     51          /// The interrupt is disabled before configuration, so it is useless
+     52          /// to do it before calling this function. When AIC_ConfigureIT returns, the
+     53          /// interrupt will always be disabled and cleared; it must be enabled by a
+     54          /// call to AIC_EnableIT().
+     55          /// \param source  Interrupt source to configure.
+     56          /// \param mode  Triggering mode and priority of the interrupt.
+     57          /// \param handler  Interrupt handler function.
+     58          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     59          void IRQ_ConfigureIT(unsigned int source,
+     60                               unsigned int mode,
+     61                               void( *handler )( void ))
+     62          {
+     63              // Disable the interrupt first
+     64              AT91C_BASE_AIC->AIC_IDCR = 1 << source;
+   \                     IRQ_ConfigureIT:
+   \   00000000   0130A0E3           MOV      R3,#+1
+   \   00000004   1330A0E1           LSL      R3,R3,R0
+   \   00000008   DBC0E0E3           MVN      R12,#+219
+   \   0000000C   E0CECCE3           BIC      R12,R12,#0xE00
+   \   00000010   00308CE5           STR      R3,[R12, #+0]
+     65          
+     66              // Configure mode and handler
+     67              AT91C_BASE_AIC->AIC_SMR[source] = mode;
+   \   00000014   49CFCCE3           BIC      R12,R12,#0x124
+   \   00000018   00118CE7           STR      R1,[R12, +R0, LSL #+2]
+     68              AT91C_BASE_AIC->AIC_SVR[source] = (unsigned int) handler;
+   \   0000001C   0001A0E1           LSL      R0,R0,#+2
+   \   00000020   802F00E5           STR      R2,[R0, #-3968]
+     69          
+     70              // Clear interrupt
+     71              AT91C_BASE_AIC->AIC_ICCR = 1 << source;
+   \   00000024   0400A0E3           MOV      R0,#+4
+   \   00000028   DC3E00E5           STR      R3,[R0, #-3804]
+     72          }
+   \   0000002C   1EFF2FE1           BX       LR               ;; return
+     73          
+     74          //------------------------------------------------------------------------------
+     75          /// Enables interrupts coming from the given (unique) source (AT91C_ID_xxx).
+     76          /// \param source  Interrupt source to enable.
+     77          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     78          void IRQ_EnableIT(unsigned int source)
+     79          {
+     80              AT91C_BASE_AIC->AIC_IECR = 1 << source;
+   \                     IRQ_EnableIT:
+   \   00000000   0110A0E3           MOV      R1,#+1
+   \   00000004   1100A0E1           LSL      R0,R1,R0
+   \   00000008   DF10E0E3           MVN      R1,#+223
+   \   0000000C   ........           B        ?Subroutine0
+     81          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?Subroutine0:
+   \   00000000   E01EC1E3           BIC      R1,R1,#0xE00
+   \   00000004   000081E5           STR      R0,[R1, #+0]
+   \   00000008   1EFF2FE1           BX       LR               ;; return
+     82          
+     83          //------------------------------------------------------------------------------
+     84          /// Disables interrupts coming from the given (unique) source (AT91C_ID_xxx).
+     85          /// \param source  Interrupt source to enable.
+     86          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     87          void IRQ_DisableIT(unsigned int source)
+     88          {
+     89              AT91C_BASE_AIC->AIC_IDCR = 1 << source;
+   \                     IRQ_DisableIT:
+   \   00000000   0110A0E3           MOV      R1,#+1
+   \   00000004   1100A0E1           LSL      R0,R1,R0
+   \   00000008   DB10E0E3           MVN      R1,#+219
+   \   0000000C                      REQUIRE ?Subroutine0
+   \   0000000C                      ;; // Fall through to label ?Subroutine0
+     90          }
+     91          
+
+   Maximum stack usage in bytes:
+
+     Function        .cstack
+     --------        -------
+     IRQ_ConfigureIT      0
+     IRQ_DisableIT        0
+     IRQ_EnableIT         0
+
+
+   Section sizes:
+
+     Function/Label  Bytes
+     --------------  -----
+     IRQ_ConfigureIT   48
+     IRQ_EnableIT      16
+     ?Subroutine0      12
+     IRQ_DisableIT     12
+
+ 
+ 88 bytes in section .text
+ 
+ 88 bytes of CODE memory
+
+Errors: none
+Warnings: none

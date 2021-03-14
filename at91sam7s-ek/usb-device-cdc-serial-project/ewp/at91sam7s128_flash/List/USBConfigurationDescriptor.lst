@@ -1,0 +1,313 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:51 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BConfigurationDescriptor.c                               #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BConfigurationDescriptor.c -D at91sam7s128 -D flash -D   #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBConfigur #
+#                    ationDescriptor.lst                                      #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBConfigura #
+#                    tionDescriptor.o                                         #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\USBConfigurationDescriptor.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          /*
+     31              Title: USBConfigurationDescriptor implementation
+     32          
+     33              About: Purpose
+     34                  Implementation of the USBConfigurationDescriptor class.
+     35          */
+     36          
+     37          //-----------------------------------------------------------------------------
+     38          //         Headers
+     39          //-----------------------------------------------------------------------------
+     40          
+     41          #include "USBConfigurationDescriptor.h"
+     42          
+     43          //-----------------------------------------------------------------------------
+     44          //         Exported functions
+     45          //-----------------------------------------------------------------------------
+     46          
+     47          //-----------------------------------------------------------------------------
+     48          /// Returns the total length of a configuration, i.e. including the 
+     49          /// descriptors following it.
+     50          /// \param configuration Pointer to a USBConfigurationDescriptor instance.
+     51          /// \return Total length (in bytes) of the configuration.
+     52          //-----------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     53          unsigned int USBConfigurationDescriptor_GetTotalLength(
+     54              const USBConfigurationDescriptor *configuration)
+     55          {
+     56              return configuration->wTotalLength;
+   \                     USBConfigurationDescriptor_GetTotalLength:
+   \   00000000   0310D0E5           LDRB     R1,[R0, #+3]
+   \   00000004   0220D0E5           LDRB     R2,[R0, #+2]
+   \   00000008   010482E1           ORR      R0,R2,R1, LSL #+8
+   \   0000000C   1EFF2FE1           BX       LR               ;; return
+     57          }
+     58          
+     59          //-----------------------------------------------------------------------------
+     60          /// Returns the number of interfaces in a configuration.
+     61          /// \param configuration Pointer to a USBConfigurationDescriptor instance.
+     62          /// \return Number of interfaces in configuration.
+     63          //-----------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     64          unsigned char USBConfigurationDescriptor_GetNumInterfaces(
+     65              const USBConfigurationDescriptor *configuration)
+     66          {
+     67              return configuration->bNumInterfaces;
+   \                     USBConfigurationDescriptor_GetNumInterfaces:
+   \   00000000   0400D0E5           LDRB     R0,[R0, #+4]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+     68          }
+     69          
+     70          //-----------------------------------------------------------------------------
+     71          /// Indicates if the device is self-powered when in a given configuration.
+     72          /// \param configuration Pointer to a USBConfigurationDescriptor instance.
+     73          /// \return 1 if the device is self-powered when in the given configuration;
+     74          ///         otherwise 0.
+     75          //-----------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     76          unsigned char USBConfigurationDescriptor_IsSelfPowered(
+     77              const USBConfigurationDescriptor *configuration)
+     78          {
+     79              if ((configuration->bmAttributes & (1 << 6)) != 0) {
+   \                     USBConfigurationDescriptor_IsSelfPowered:
+   \   00000000   0700D0E5           LDRB     R0,[R0, #+7]
+   \   00000004   400010E3           TST      R0,#0x40
+   \   00000008   0100000A           BEQ      ??USBConfigurationDescriptor_IsSelfPowered_0
+     80          
+     81                  return 1;
+   \   0000000C   0100A0E3           MOV      R0,#+1
+   \   00000010   1EFF2FE1           BX       LR
+     82              }
+     83              else {
+     84          
+     85                  return 0;
+   \                     ??USBConfigurationDescriptor_IsSelfPowered_0:
+   \   00000014   0000A0E3           MOV      R0,#+0
+   \   00000018   1EFF2FE1           BX       LR               ;; return
+     86              }
+     87          }
+     88          
+     89          //-----------------------------------------------------------------------------
+     90          /// Parses the given Configuration descriptor (followed by relevant
+     91          /// interface, endpoint and class-specific descriptors) into three arrays.
+     92          /// *Each array must have its size equal or greater to the number of
+     93          /// descriptors it stores plus one*. A null-value is inserted after the last
+     94          /// descriptor of each type to indicate the array end.
+     95          ///
+     96          /// Note that if the pointer to an array is null (0), nothing is stored in
+     97          /// it.
+     98          /// \param configuration Pointer to the start of the whole Configuration 
+     99          ///                      descriptor.
+    100          /// \param interfaces    Pointer to the Interface descriptor array.
+    101          /// \param endpoints     Pointer to the Endpoint descriptor array.
+    102          /// \param others        Pointer to the class-specific descriptor array.
+    103          //-----------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    104          void USBConfigurationDescriptor_Parse(
+    105              const USBConfigurationDescriptor *configuration,
+    106              USBInterfaceDescriptor **interfaces,
+    107              USBEndpointDescriptor **endpoints,
+    108              USBGenericDescriptor **others)
+    109          {
+   \                     USBConfigurationDescriptor_Parse:
+   \   00000000   F0412DE9           PUSH     {R4-R8,LR}
+   \   00000004   0040A0E1           MOV      R4,R0
+   \   00000008   0150A0E1           MOV      R5,R1
+   \   0000000C   0260A0E1           MOV      R6,R2
+   \   00000010   0370A0E1           MOV      R7,R3
+    110              // Get size of configuration to parse
+    111              int size = USBConfigurationDescriptor_GetTotalLength(configuration);
+    112              size -= sizeof(USBConfigurationDescriptor);
+   \   00000014   ........           BL       USBConfigurationDescriptor_GetTotalLength
+   \   00000018   098040E2           SUB      R8,R0,#+9
+    113          
+    114              // Start parsing descriptors
+    115              USBGenericDescriptor *descriptor = (USBGenericDescriptor *) configuration;
+   \   0000001C   010000EA           B        ??USBConfigurationDescriptor_Parse_0
+    116              while (size > 0) {
+    117          
+    118                  // Get next descriptor
+    119                  descriptor = USBGenericDescriptor_GetNextDescriptor(descriptor);
+    120                  size -= USBGenericDescriptor_GetLength(descriptor);
+    121          
+    122                  // Store descriptor in correponding array
+    123                  if (USBGenericDescriptor_GetType(descriptor)
+    124                       == USBGenericDescriptor_INTERFACE) {
+    125          
+    126                      if (interfaces) {
+   \                     ??USBConfigurationDescriptor_Parse_1:
+   \   00000020   000055E3           CMP      R5,#+0
+    127                      
+    128                          *interfaces = (USBInterfaceDescriptor *) descriptor;
+   \   00000024   04408514           STRNE    R4,[R5], #+4
+    129                          interfaces++;
+    130                      }
+    131                  }
+   \                     ??USBConfigurationDescriptor_Parse_0:
+   \   00000028   010058E3           CMP      R8,#+1
+   \   0000002C   140000BA           BLT      ??USBConfigurationDescriptor_Parse_2
+   \   00000030   0400A0E1           MOV      R0,R4
+   \   00000034   ........           BL       USBGenericDescriptor_GetNextDescriptor
+   \   00000038   0040A0E1           MOV      R4,R0
+   \   0000003C   ........           BL       USBGenericDescriptor_GetLength
+   \   00000040   008048E0           SUB      R8,R8,R0
+   \   00000044   0400A0E1           MOV      R0,R4
+   \   00000048   ........           BL       USBGenericDescriptor_GetType
+   \   0000004C   040050E3           CMP      R0,#+4
+   \   00000050   F2FFFF0A           BEQ      ??USBConfigurationDescriptor_Parse_1
+    132                  else if (USBGenericDescriptor_GetType(descriptor)
+    133                            == USBGenericDescriptor_ENDPOINT) {
+   \   00000054   0400A0E1           MOV      R0,R4
+   \   00000058   ........           BL       USBGenericDescriptor_GetType
+   \   0000005C   050050E3           CMP      R0,#+5
+   \   00000060   0300001A           BNE      ??USBConfigurationDescriptor_Parse_3
+    134          
+    135                      if (endpoints) {
+   \   00000064   000056E3           CMP      R6,#+0
+   \   00000068   EEFFFF0A           BEQ      ??USBConfigurationDescriptor_Parse_0
+    136                          
+    137                          *endpoints = (USBEndpointDescriptor *) descriptor;
+   \   0000006C   044086E4           STR      R4,[R6], #+4
+    138                          endpoints++;
+   \   00000070   ECFFFFEA           B        ??USBConfigurationDescriptor_Parse_0
+    139                      }
+    140                  }
+    141                  else if (others) {
+   \                     ??USBConfigurationDescriptor_Parse_3:
+   \   00000074   000057E3           CMP      R7,#+0
+   \   00000078   EAFFFF0A           BEQ      ??USBConfigurationDescriptor_Parse_0
+    142          
+    143                      *others = descriptor;
+   \   0000007C   044087E4           STR      R4,[R7], #+4
+    144                      others++;
+   \   00000080   E8FFFFEA           B        ??USBConfigurationDescriptor_Parse_0
+    145                  }
+    146              }
+    147          
+    148              // Null-terminate arrays
+    149              if (interfaces) {
+   \                     ??USBConfigurationDescriptor_Parse_2:
+   \   00000084   0000A0E3           MOV      R0,#+0
+   \   00000088   000055E3           CMP      R5,#+0
+    150          
+    151                  *interfaces = 0;
+   \   0000008C   00008515           STRNE    R0,[R5, #+0]
+    152              }
+    153              if (endpoints) {
+   \   00000090   000056E3           CMP      R6,#+0
+    154          
+    155                  *endpoints = 0;
+   \   00000094   00008615           STRNE    R0,[R6, #+0]
+    156              }
+    157              if (others) {
+   \   00000098   000057E3           CMP      R7,#+0
+    158          
+    159                  *others = 0;
+   \   0000009C   00008715           STRNE    R0,[R7, #+0]
+    160              }
+    161          }
+   \   000000A0   F041BDE8           POP      {R4-R8,LR}
+   \   000000A4   1EFF2FE1           BX       LR               ;; return
+    162          
+
+   Maximum stack usage in bytes:
+
+     Function                       .cstack
+     --------                       -------
+     USBConfigurationDescriptor_GetNumInterfaces
+                                         0
+     USBConfigurationDescriptor_GetTotalLength
+                                         0
+     USBConfigurationDescriptor_IsSelfPowered
+                                         0
+     USBConfigurationDescriptor_Parse
+                                        24
+
+
+   Section sizes:
+
+     Function/Label                 Bytes
+     --------------                 -----
+     USBConfigurationDescriptor_GetTotalLength
+                                      16
+     USBConfigurationDescriptor_GetNumInterfaces
+                                       8
+     USBConfigurationDescriptor_IsSelfPowered
+                                      28
+     USBConfigurationDescriptor_Parse
+                                     168
+
+ 
+ 220 bytes in section .text
+ 
+ 220 bytes of CODE memory
+
+Errors: none
+Warnings: none

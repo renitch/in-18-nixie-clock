@@ -1,0 +1,274 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BGenericRequest.c                                        #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BGenericRequest.c -D at91sam7s128 -D flash -D            #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBGenericR #
+#                    equest.lst                                               #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBGenericRe #
+#                    quest.o                                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\USBGenericRequest.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          /*
+     31              Title: USBGenericRequest implementation
+     32          
+     33              About: Purpose
+     34                  Implementation of the USBGenericRequest class.
+     35          */
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Headers
+     39          //------------------------------------------------------------------------------
+     40          
+     41          #include "USBGenericRequest.h"
+     42          
+     43          //------------------------------------------------------------------------------
+     44          //         Exported functions
+     45          //------------------------------------------------------------------------------
+     46          //------------------------------------------------------------------------------
+     47          /// Returns the type of the given request.
+     48          /// \param request Pointer to a USBGenericRequest instance.
+     49          /// \return "USB Request Types"
+     50          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     51          extern unsigned char USBGenericRequest_GetType(const USBGenericRequest *request)
+     52          {
+     53              return ((request->bmRequestType >> 5) & 0x3);
+   \                     USBGenericRequest_GetType:
+   \   00000000   0000D0E5           LDRB     R0,[R0, #+0]
+   \   00000004   0310A0E3           MOV      R1,#+3
+   \   00000008   A00201E0           AND      R0,R1,R0, LSR #+5
+   \   0000000C   1EFF2FE1           BX       LR               ;; return
+     54          }
+     55          
+     56          //------------------------------------------------------------------------------
+     57          /// Returns the request code of the given request.
+     58          /// \param request Pointer to a USBGenericRequest instance.
+     59          /// \return Request code.
+     60          /// \sa "USB Request Codes"
+     61          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     62          unsigned char USBGenericRequest_GetRequest(const USBGenericRequest *request)
+     63          {
+     64              return request->bRequest;
+   \                     USBGenericRequest_GetRequest:
+   \   00000000   0100D0E5           LDRB     R0,[R0, #+1]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+     65          }
+     66          
+     67          //------------------------------------------------------------------------------
+     68          /// Returns the wValue field of the given request.
+     69          /// \param request - Pointer to a USBGenericRequest instance.
+     70          /// \return Request value.
+     71          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     72          unsigned short USBGenericRequest_GetValue(const USBGenericRequest *request)
+     73          {
+     74              return request->wValue;
+   \                     USBGenericRequest_GetValue:
+   \   00000000   B200D0E1           LDRH     R0,[R0, #+2]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+     75          }
+     76          
+     77          //------------------------------------------------------------------------------
+     78          /// Returns the wIndex field of the given request.
+     79          /// \param request Pointer to a USBGenericRequest instance.
+     80          /// \return Request index;
+     81          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     82          unsigned short USBGenericRequest_GetIndex(const USBGenericRequest *request)
+     83          {
+     84              return request->wIndex;
+   \                     USBGenericRequest_GetIndex:
+   \   00000000   B400D0E1           LDRH     R0,[R0, #+4]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+     85          }
+     86          
+     87          //------------------------------------------------------------------------------
+     88          /// Returns the expected length of the data phase following a request.
+     89          /// \param request Pointer to a USBGenericRequest instance.
+     90          /// \return Length of data phase.
+     91          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     92          unsigned short USBGenericRequest_GetLength(const USBGenericRequest *request)
+     93          {
+     94              return request->wLength;
+   \                     USBGenericRequest_GetLength:
+   \   00000000   B600D0E1           LDRH     R0,[R0, #+6]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+     95          }
+     96          
+     97          //------------------------------------------------------------------------------
+     98          /// Returns the endpoint number targetted by a given request.
+     99          /// \param request Pointer to a USBGenericRequest instance.
+    100          /// \return Endpoint number.
+    101          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    102          unsigned char USBGenericRequest_GetEndpointNumber(
+    103              const USBGenericRequest *request)
+    104          {
+    105              return USBGenericRequest_GetIndex(request) & 0xF;
+   \                     USBGenericRequest_GetEndpointNumber:
+   \   00000000   0400D0E5           LDRB     R0,[R0, #+4]
+   \   00000004   ........           B        ?Subroutine0
+    106          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?Subroutine0:
+   \   00000000   0F0000E2           AND      R0,R0,#0xF
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+    107          
+    108          //------------------------------------------------------------------------------
+    109          /// Returns the intended recipient of a given request.
+    110          /// \param request Pointer to a USBGenericRequest instance.
+    111          /// \return Request recipient.
+    112          /// \sa "USB Request Recipients"
+    113          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    114          unsigned char USBGenericRequest_GetRecipient(const USBGenericRequest *request)
+    115          {
+    116              // Recipient is in bits [0..4] of the bmRequestType field
+    117              return request->bmRequestType & 0xF;
+   \                     USBGenericRequest_GetRecipient:
+   \   00000000   0000D0E5           LDRB     R0,[R0, #+0]
+   \   00000004                      REQUIRE ?Subroutine0
+   \   00000004                      ;; // Fall through to label ?Subroutine0
+    118          }
+    119          
+    120          //------------------------------------------------------------------------------
+    121          /// Returns the direction of the data transfer following the given request.
+    122          /// \param request Pointer to a USBGenericRequest instance.
+    123          /// \return Transfer direction.
+    124          /// \sa "USB Request Directions"
+    125          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    126          unsigned char USBGenericRequest_GetDirection(const USBGenericRequest *request)
+    127          {
+    128              // Transfer direction is located in bit D7 of the bmRequestType field
+    129              if ((request->bmRequestType & 0x80) != 0) {
+   \                     USBGenericRequest_GetDirection:
+   \   00000000   0000D0E5           LDRB     R0,[R0, #+0]
+   \   00000004   800010E3           TST      R0,#0x80
+   \   00000008   0100000A           BEQ      ??USBGenericRequest_GetDirection_0
+    130          
+    131                  return USBGenericRequest_IN;
+   \   0000000C   0100A0E3           MOV      R0,#+1
+   \   00000010   1EFF2FE1           BX       LR
+    132              }
+    133              else {
+    134          
+    135                  return USBGenericRequest_OUT;
+   \                     ??USBGenericRequest_GetDirection_0:
+   \   00000014   0000A0E3           MOV      R0,#+0
+   \   00000018   1EFF2FE1           BX       LR               ;; return
+    136              }
+    137          }
+    138          
+
+   Maximum stack usage in bytes:
+
+     Function                       .cstack
+     --------                       -------
+     USBGenericRequest_GetDirection      0
+     USBGenericRequest_GetEndpointNumber
+                                         0
+     USBGenericRequest_GetIndex          0
+     USBGenericRequest_GetLength         0
+     USBGenericRequest_GetRecipient      0
+     USBGenericRequest_GetRequest        0
+     USBGenericRequest_GetType           0
+     USBGenericRequest_GetValue          0
+
+
+   Section sizes:
+
+     Function/Label                 Bytes
+     --------------                 -----
+     USBGenericRequest_GetType        16
+     USBGenericRequest_GetRequest      8
+     USBGenericRequest_GetValue        8
+     USBGenericRequest_GetIndex        8
+     USBGenericRequest_GetLength       8
+     USBGenericRequest_GetEndpointNumber
+                                       8
+     ?Subroutine0                      8
+     USBGenericRequest_GetRecipient    4
+     USBGenericRequest_GetDirection   28
+
+ 
+ 96 bytes in section .text
+ 
+ 96 bytes of CODE memory
+
+Errors: none
+Warnings: none

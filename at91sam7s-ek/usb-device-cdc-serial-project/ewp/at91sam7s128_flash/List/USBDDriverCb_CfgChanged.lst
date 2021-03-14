@@ -1,0 +1,120 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BDDriverCb_CfgChanged.c                                  #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BDDriverCb_CfgChanged.c -D at91sam7s128 -D flash -D      #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBDDriverC #
+#                    b_CfgChanged.lst                                         #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBDDriverCb #
+#                    _CfgChanged.o                                            #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\USBDDriverCb_CfgChanged.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "USBDDriverCallbacks.h"
+     35          #include <utility/trace.h>
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Global functions
+     39          //------------------------------------------------------------------------------
+     40          
+     41          //------------------------------------------------------------------------------
+     42          /// Indicates that the current configuration of the device has changed.
+     43          /// \param cfgnum  New device configuration index.
+     44          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     45          void USBDDriverCallbacks_ConfigurationChanged(unsigned char cfgnum)
+     46          {
+     47              TRACE_INFO_WP("ConfigurationChanged ");
+     48          }
+   \                     USBDDriverCallbacks_ConfigurationChanged:
+   \   00000000   1EFF2FE1           BX       LR               ;; return
+     49          
+
+   Maximum stack usage in bytes:
+
+     Function                       .cstack
+     --------                       -------
+     USBDDriverCallbacks_ConfigurationChanged
+                                         0
+
+
+   Section sizes:
+
+     Function/Label                 Bytes
+     --------------                 -----
+     USBDDriverCallbacks_ConfigurationChanged
+                                       4
+
+ 
+ 4 bytes in section .text
+ 
+ 4 bytes of CODE memory
+
+Errors: none
+Warnings: none

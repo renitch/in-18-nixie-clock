@@ -1,0 +1,295 @@
+###############################################################################
+#                                                                             #
+#     IAR Assembler V5.50.0.51878/W32 for ARM 14/Mar/2021  19:14:52           #
+#     Copyright (C) 1999-2010 IAR Systems AB.                                 #
+#                                                                             #
+#           Source file   =  C:\Projects\in-18-nixie-clock\at91lib\boards\at91sam7s-ek\board_cstartup_iar.s#
+#           List file     =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\List\board_cstartup_iar.lst#
+#           Object file   =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\Obj\board_cstartup_iar.o#
+#           Command line  =  C:\Projects\in-18-nixie-clock\at91lib\boards\at91sam7s-ek\board_cstartup_iar.s #
+#                            -OC:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\Obj\ #
+#                            -s+ -M<> -w+ -r -Dat91sam7s128 -Dflash           #
+#                            -DTRACE_LEVEL=3                                  #
+#                            -LC:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\List\ #
+#                            -t8 --cpu ARM7TDMI --fpu None                    #
+#                            -IC:\Program Files (x86)\IAR Systems\Embedded Workbench 5.4\arm\INC\ #
+#                            -IC:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\..\..\..\at91lib\ #
+#                            -IC:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\..\..\..\at91lib\peripherals\ #
+#                            -IC:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\..\..\..\at91lib\boards\at91sam7s-ek\ #
+#                                                                             #
+###############################################################################
+
+    1                          /* --------------------------------------------
+                               --------------------------------
+    2                           *         ATMEL Microcontroller Software
+                                Support 
+    3                           * --------------------------------------------
+                               --------------------------------
+    4                           * Copyright (c) 2008, Atmel Corporation
+    5                           *
+    6                           * All rights reserved.
+    7                           *
+    8                           * Redistribution and use in source and binary
+                                forms, with or without
+    9                           * modification, are permitted provided that
+                                the following conditions are met:
+   10                           *
+   11                           * - Redistributions of source code must retain
+                                the above copyright notice,
+   12                           * this list of conditions and the disclaimer
+                                below.
+   13                           *
+   14                           * Atmel's name may not be used to endorse or
+                                promote products derived from
+   15                           * this software without specific prior written
+                                permission.
+   16                           *
+   17                           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY
+                                ATMEL "AS IS" AND ANY EXPRESS OR
+   18                           * IMPLIED WARRANTIES, INCLUDING, BUT NOT
+                                LIMITED TO, THE IMPLIED WARRANTIES OF
+   19                           * MERCHANTABILITY, FITNESS FOR A PARTICULAR
+                                PURPOSE AND NON-INFRINGEMENT ARE
+   20                           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE
+                                LIABLE FOR ANY DIRECT, INDIRECT,
+   21                           * INCIDENTAL, SPECIAL, EXEMPLARY, OR
+                                CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+                                NOT
+   22                           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+                                OR SERVICES; LOSS OF USE, DATA,
+   23                           * OR PROFITS; OR BUSINESS INTERRUPTION)
+                                HOWEVER CAUSED AND ON ANY THEORY OF
+   24                           * LIABILITY, WHETHER IN CONTRACT, STRICT
+                                LIABILITY, OR TORT (INCLUDING
+   25                           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+                                OUT OF THE USE OF THIS SOFTWARE,
+   26                           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+                                DAMAGE.
+   27                           * --------------------------------------------
+                               --------------------------------
+   28                           */
+   29                          
+   30                          /*
+   31                               IAR startup file for AT91SAM7S microcontro
+                               llers.
+   32                           */
+   33                          
+   34                                  MODULE  ?cstartup
+   35                          
+   36                                  ;; Forward declaration of sections.
+   37                                  SECTION IRQ_STACK:DATA:NOROOT(2)
+   38                                  SECTION CSTACK:DATA:NOROOT(3)
+   39                          
+   40                          //---------------------------------------------
+                               ---------------------------------
+   41                          //         Headers
+   42                          //---------------------------------------------
+                               ---------------------------------
+   43                          
+   44                          #define __ASSEMBLY__
+   45                          #include "board.h"
+   46                          
+   47                          //---------------------------------------------
+                               ---------------------------------
+   48                          //         Definitions
+   49                          //---------------------------------------------
+                               ---------------------------------
+   50                          
+   51                          #define ARM_MODE_ABT     0x17
+   52                          #define ARM_MODE_FIQ     0x11
+   53                          #define ARM_MODE_IRQ     0x12
+   54                          #define ARM_MODE_SVC     0x13
+   55                          #define ARM_MODE_SYS     0x1F
+   56                          
+   57                          #define I_BIT            0x80
+   58                          #define F_BIT            0x40
+   59                          
+   60                          //---------------------------------------------
+                               ---------------------------------
+   61                          //         Startup routine
+   62                          //---------------------------------------------
+                               ---------------------------------
+   63                          
+   64                          /*
+   65                             Exception vectors
+   66                           */
+   67                                  SECTION .vectors:CODE:NOROOT(2)
+   68                          
+   69                                  PUBLIC  resetVector
+   70                                  PUBLIC  irqHandler
+   71                          
+   72                                  EXTERN  Undefined_Handler
+   73                                  EXTERN  SWI_Handler
+   74                                  EXTERN  Prefetch_Handler
+   75                                  EXTERN  Abort_Handler
+   76                                  EXTERN  FIQ_Handler
+   77                          
+   78                                  ARM
+   79                          
+   80                          __iar_init$$done:               ; The interrupt
+                                vector is not needed
+   81                                                          ; until after
+                                copy initialization is done
+   82                          
+   83                          resetVector:
+   84                                  ; All default exception handlers
+                                (except reset) are
+   85                                  ; defined as weak symbol definitions.
+   86                                  ; If a handler is defined by the
+                                application it will take precedence.
+   87    00000000 88F09FE5             LDR     pc, =resetHandler        ;
+                                                    Reset
+   88    00000004 14F09FE5             LDR     pc, Undefined_Addr       ;
+                                                    Undefined instructions
+   89    00000008 14F09FE5             LDR     pc, SWI_Addr             ;
+                                                    Software interrupt
+                                                    (SWI/SYS)
+   90    0000000C 14F09FE5             LDR     pc, Prefetch_Addr        ;
+                                                    Prefetch abort
+   91    00000010 14F09FE5             LDR     pc, Abort_Addr           ; Data
+                                                    abort
+   92    00000014 FEFFFFEA             B       .                        ;
+                                                RESERVED
+   93    00000018 74F09FE5             LDR     pc, =irqHandler          ;
+                                                    IRQ
+   94    0000001C 0CF09FE5             LDR     pc, FIQ_Addr             ;
+                                                    FIQ
+   95                          
+   96    00000020 ........     Undefined_Addr: DCD   Undefined_Handler
+   97    00000024 ........     SWI_Addr:       DCD   SWI_Handler
+   98    00000028 ........     Prefetch_Addr:  DCD   Prefetch_Handler
+   99    0000002C ........     Abort_Addr:     DCD   Abort_Handler
+  100    00000030 ........     FIQ_Addr:       DCD   FIQ_Handler
+  101                                  
+  102                          /*
+  103                             Handles incoming interrupt requests by
+                                branching to the corresponding
+  104                             handler, as defined in the AIC. Supports
+                                interrupt nesting.
+  105                           */
+  106                          irqHandler:
+  107                                  /* Save interrupt context on the stack
+                                to allow nesting */
+  108    00000034 04E04EE2             SUB     lr, lr, #4
+  109    00000038 00402DE9             STMFD   sp!, {lr}
+  110    0000003C 00E04FE1             MRS     lr, SPSR
+  111    00000040 01402DE9             STMFD   sp!, {r0, lr}
+  112                          
+  113                                  /* Write in the IVR to support Protect
+                                Mode */
+  114    00000044 4CE09FE5             LDR     lr, =AT91C_BASE_AIC
+  115    00000048 00019EE5             LDR     r0, [r14, #AIC_IVR]
+  116    0000004C 00E18EE5             STR     lr, [r14, #AIC_IVR]
+  117                          
+  118                                  /* Branch to interrupt handler in
+                                Supervisor mode */
+  119    00000050 1FF021E3             MSR     CPSR_c, #ARM_MODE_SYS
+  120    00000054 1E502DE9             STMFD   sp!, {r1-r3, r4, r12, lr}
+  121                          
+  122                                  /* Check for 8-byte alignment and save
+                                lr plus a */
+  123                                  /* word to indicate the stack
+                                adjustment used (0 or 4) */
+  124    00000058 04100DE2             AND     r1, sp, #4
+  125    0000005C 01D04DE0             SUB     sp, sp, r1
+  126    00000060 02402DE9             STMFD   sp!, {r1, lr}
+  127                          
+  128    00000064 0FE0A0E1             MOV     lr, pc
+  129    00000068 10FF2FE1             BX      r0
+  130                          
+  131    0000006C 0240BDE8             LDMIA   sp!, {r1, lr}
+  132    00000070 01D08DE0             ADD     sp, sp, r1
+  133                                  
+  134    00000074 1E50BDE8             LDMIA   sp!, {r1-r3, r4, r12, lr}
+  135    00000078 92F021E3             MSR     CPSR_c, #ARM_MODE_IRQ |
+                                                        I_BIT
+  136                          
+  137                                  /* Acknowledge interrupt */
+  138    0000007C 14E09FE5             LDR     lr, =AT91C_BASE_AIC
+  139    00000080 30E18EE5             STR     lr, [r14, #AIC_EOICR]
+  140                          
+  141                                  /* Restore interrupt context and branch
+                                back to calling code */
+  142    00000084 0140BDE8             LDMIA   sp!, {r0, lr}
+  143    00000088 0EF06FE1             MSR     SPSR_cxsf, lr
+  144    0000008C 0080FDE8             LDMIA   sp!, {pc}^
+  145                          
+  146                          
+  147                          /*
+  148                             After a reset, execution starts here, the
+                                mode is ARM, supervisor
+  149                             with interrupts disabled.
+  150                             Initializes the chip and branches to the
+                                main() function.
+  151                           */
+  152                                  SECTION .cstartup:CODE:NOROOT(2)
+  152.1                                 TABLE
+  152.2  00000090 ........             Reference on line 87 
+  152.3  00000094 ........             Reference on line 93 
+  152.4  00000098 00F0FFFF             Reference on line 114,138 
+  152.5                                RSEG (including table)
+  152                                  SECTION .cstartup:CODE:NOROOT(2)
+  153                          
+  154                                  PUBLIC  resetHandler
+  155                                  EXTERN  LowLevelInit
+  156                                  EXTERN  ?main
+  157                                  REQUIRE resetVector
+  158                                  ARM
+  159                          
+  160                          resetHandler:
+  161                          
+  162                                  /* Set pc to actual code location (i.e.
+                                not in remap zone) */
+  163    00000000 30F09FE5                 LDR     pc, =label
+  164                          
+  165                                  /* Perform low-level initialization of
+                                the chip using LowLevelInit() */
+  166                          label:
+  167    00000004 30009FE5                 LDR     r0, =LowLevelInit
+  168    00000008 30409FE5             LDR     r4, =SFE(CSTACK)
+  169    0000000C 04D0A0E1             MOV     sp, r4
+  170    00000010 0FE0A0E1             MOV     lr, pc
+  171    00000014 10FF2FE1             BX      r0
+  172                          
+  173                                  /* Set up the interrupt stack pointer.
+                                */
+  174    00000018 D2F021E3             MSR     cpsr_c, #ARM_MODE_IRQ | I_BIT |
+                                                        F_BIT      ; Change the
+                                                        mode
+  175    0000001C 20D09FE5             LDR     sp, =SFE(IRQ_STACK)
+  176                          
+  177                                  /* Set up the SYS stack pointer.
+                                */
+  178    00000020 5FF021E3             MSR     cpsr_c, #ARM_MODE_SYS | F_BIT   
+                                                                  ; Change the
+                                                        mode
+  179    00000024 14D09FE5             LDR     sp, =SFE(CSTACK)
+  180                          
+  181                                  /* Branch to main() */
+  182    00000028 18009FE5             LDR     r0, =?main
+  183    0000002C 0FE0A0E1             MOV     lr, pc
+  184    00000030 10FF2FE1             BX      r0
+  185                          
+  186                                  /* Loop indefinitely when program is
+                                finished */
+  187                          loop4:
+  188    00000034 FEFFFFEA             B       loop4
+  189                          
+  190                                  END
+  190.1                                 TABLE
+  190.2  00000038 ........             Reference on line 163 
+  190.3  0000003C ........             Reference on line 167 
+  190.4  00000040 ........             Reference on line 168,179 
+  190.5  00000044 ........             Reference on line 175 
+  190.6  00000048 ........             Reference on line 182 
+  190.7                                END (including table)
+##############################
+#           CRC:0            #
+#        Errors:   0         #
+#        Warnings: 0         #
+#         Bytes: 232         #
+##############################
+
+
+
+

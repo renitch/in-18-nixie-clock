@@ -1,0 +1,369 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:53 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\peripherals\cp15\c #
+#                    p15.c                                                    #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\peripherals\cp15\c #
+#                    p15.c -D at91sam7s128 -D flash -D TRACE_LEVEL=3 -lC      #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\ --remarks  #
+#                    --diag_suppress Pe826,Pe1375 -o                          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\cp15.lst    #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\cp15.o       #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\peripherals\cp15\cp15.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //-----------------------------------------------------------------------------
+     31          // Reg Reads                    Writes
+     32          //----------------------------------------------------------------------------
+     33          // 0   ID code                  Unpredictable
+     34          // 0   cache type               Unpredictable
+     35          // 0   TCM status               Unpredictable
+     36          // 1   Control                  Control
+     37          // 2   Translation table base   Translation table base
+     38          // 3   Domain access control    Domain access control
+     39          // 4                                                       (Reserved)    
+     40          // 5   Data fault status        Data fault status
+     41          // 5   Instruction fault status Instruction fault status
+     42          // 6   Fault address            Fault address
+     43          // 7   cache operations         cache operations
+     44          // 8   Unpredictable            TLB operations
+     45          // 9   cache lockdown           cache lockdown
+     46          // 9   TCM region               TCM region
+     47          // 10  TLB lockdown             TLB lockdown
+     48          // 11                                                      (Reserved) 
+     49          // 12                                                      (Reserved) 
+     50          // 13  FCSE PID                 FCSE PID
+     51          // 13  Context ID               Context ID
+     52          // 14                                                      (Reserved)             
+     53          // 15  Test configuration       Test configuration
+     54          //-----------------------------------------------------------------------------
+     55          
+     56          //-----------------------------------------------------------------------------
+     57          //         Headers
+     58          //-----------------------------------------------------------------------------
+     59          
+     60          #include <board.h>
+     61          
+     62          #ifdef CP15_PRESENT
+     63          
+     64          #include <utility/trace.h>
+     65          #include "cp15.h"
+     66          
+     67          #if defined(__ICCARM__)
+     68          #include <intrinsics.h>
+     69          #endif
+     70          
+     71          
+     72          //-----------------------------------------------------------------------------
+     73          //         Macros
+     74          //-----------------------------------------------------------------------------
+     75          
+     76          //-----------------------------------------------------------------------------
+     77          //         Defines
+     78          //-----------------------------------------------------------------------------
+     79          
+     80          
+     81          //-----------------------------------------------------------------------------
+     82          //         Global functions
+     83          //-----------------------------------------------------------------------------
+     84          
+     85          
+     86          ///////////////////////////////////////////////////////////////////////////////
+     87          /// CP15 c1
+     88          /// * I cache
+     89          /// * D cache
+     90          ///////////////////////////////////////////////////////////////////////////////
+     91          
+     92          //------------------------------------------------------------------------------
+     93          /// Check Instruction cache
+     94          /// \return 0 if I_cache disable, 1 if I_cache enable
+     95          //------------------------------------------------------------------------------
+     96          unsigned int CP15_IsIcacheEnabled(void)
+     97          {
+     98              unsigned int control;
+     99          
+    100              control = CP15_ReadControl();
+    101              return ((control & (1 << CP15_I_BIT)) != 0);
+    102          } 
+    103          
+    104          //------------------------------------------------------------------------------
+    105          /// Enable Instruction cache
+    106          //------------------------------------------------------------------------------
+    107          void CP15_EnableIcache(void)
+    108          {
+    109              unsigned int control;
+    110          
+    111              control = CP15_ReadControl();
+    112          
+    113              // Check if cache is disabled
+    114              if ((control & (1 << CP15_I_BIT)) == 0) {
+    115          
+    116                  control |= (1 << CP15_I_BIT);
+    117                  CP15_WriteControl(control);        
+    118                  TRACE_INFO("I cache enabled.\n\r");
+    119              }
+    120          #if !defined(OP_BOOTSTRAP_on)
+    121              else {
+    122          
+    123                  TRACE_INFO("I cache is already enabled.\n\r");
+    124              }
+    125          #endif
+    126          }
+    127          
+    128          //------------------------------------------------------------------------------
+    129          /// Disable Instruction cache
+    130          //------------------------------------------------------------------------------
+    131          void CP15_DisableIcache(void)
+    132          {
+    133              unsigned int control;
+    134          
+    135              control = CP15_ReadControl();
+    136          
+    137              // Check if cache is enabled
+    138              if ((control & (1 << CP15_I_BIT)) != 0) {
+    139          
+    140                  control &= ~(1 << CP15_I_BIT);
+    141                  CP15_WriteControl(control);        
+    142                  TRACE_INFO("I cache disabled.\n\r");
+    143              }
+    144              else {
+    145          
+    146                  TRACE_INFO("I cache is already disabled.\n\r");
+    147              }
+    148          } 
+    149          
+    150          //------------------------------------------------------------------------------
+    151          /// Check MMU
+    152          /// \return 0 if MMU disable, 1 if MMU enable
+    153          //------------------------------------------------------------------------------
+    154          unsigned int CP15_IsMMUEnabled(void)
+    155          {
+    156              unsigned int control;
+    157          
+    158              control = CP15_ReadControl();
+    159              return ((control & (1 << CP15_M_BIT)) != 0);
+    160          } 
+    161          
+    162          //------------------------------------------------------------------------------
+    163          /// Enable MMU
+    164          //------------------------------------------------------------------------------
+    165          void CP15_EnableMMU(void)
+    166          {
+    167              unsigned int control;
+    168          
+    169              control = CP15_ReadControl();
+    170          
+    171              // Check if MMU is disabled
+    172              if ((control & (1 << CP15_M_BIT)) == 0) {
+    173          
+    174                  control |= (1 << CP15_M_BIT);
+    175                  CP15_WriteControl(control);        
+    176                  TRACE_INFO("MMU enabled.\n\r");
+    177              }
+    178              else {
+    179          
+    180                  TRACE_INFO("MMU is already enabled.\n\r");
+    181              }
+    182          }
+    183          
+    184          //------------------------------------------------------------------------------
+    185          /// Disable MMU
+    186          //------------------------------------------------------------------------------
+    187          void CP15_DisableMMU(void)
+    188          {
+    189              unsigned int control;
+    190          
+    191              control = CP15_ReadControl();
+    192          
+    193              // Check if MMU is enabled
+    194              if ((control & (1 << CP15_M_BIT)) != 0) {
+    195          
+    196                  control &= ~(1 << CP15_M_BIT);
+    197                  control &= ~(1 << CP15_C_BIT);
+    198                  CP15_WriteControl(control);        
+    199                  TRACE_INFO("MMU disabled.\n\r");
+    200              }
+    201              else {
+    202          
+    203                  TRACE_INFO("MMU is already disabled.\n\r");
+    204              }
+    205          }
+    206          
+    207          //------------------------------------------------------------------------------
+    208          /// Check D_cache
+    209          /// \return 0 if D_cache disable, 1 if D_cache enable (with MMU of course)
+    210          //------------------------------------------------------------------------------
+    211          unsigned int CP15_IsDcacheEnabled(void)
+    212          {
+    213              unsigned int control;
+    214          
+    215              control = CP15_ReadControl();
+    216              return ((control & ((1 << CP15_C_BIT)||(1 << CP15_M_BIT))) != 0);
+    217          } 
+    218          
+    219          //------------------------------------------------------------------------------
+    220          /// Enable Data cache
+    221          //------------------------------------------------------------------------------
+    222          void CP15_EnableDcache(void)
+    223          {
+    224              unsigned int control;
+    225          
+    226              control = CP15_ReadControl();
+    227          
+    228              if( !CP15_IsMMUEnabled() ) {
+    229                  TRACE_ERROR("Do nothing: MMU not enabled\n\r");
+    230              }
+    231              else {
+    232                  // Check if cache is disabled
+    233                  if ((control & (1 << CP15_C_BIT)) == 0) {
+    234          
+    235                      control |= (1 << CP15_C_BIT);
+    236                      CP15_WriteControl(control);        
+    237                      TRACE_INFO("D cache enabled.\n\r");
+    238                  }
+    239                  else {
+    240          
+    241                      TRACE_INFO("D cache is already enabled.\n\r");
+    242                  }
+    243              }
+    244          }
+    245          
+    246          //------------------------------------------------------------------------------
+    247          /// Disable Data cache
+    248          //------------------------------------------------------------------------------
+    249          void CP15_DisableDcache(void)
+    250          {
+    251              unsigned int control;
+    252          
+    253              control = CP15_ReadControl();
+    254          
+    255              // Check if cache is enabled
+    256              if ((control & (1 << CP15_C_BIT)) != 0) {
+    257          
+    258                  control &= ~(1 << CP15_C_BIT);
+    259                  CP15_WriteControl(control);        
+    260                  TRACE_INFO("D cache disabled.\n\r");
+    261              }
+    262              else {
+    263          
+    264                  TRACE_INFO("D cache is already disabled.\n\r");
+    265              }
+    266          }
+    267          
+    268          //----------------------------------------------------------------------------
+    269          /// Lock I cache
+    270          /// \param I cache index
+    271          //----------------------------------------------------------------------------
+    272          void CP15_LockIcache(unsigned int index)
+    273          {
+    274              unsigned int victim = 0;
+    275          
+    276              // invalidate all the cache (4 ways) 
+    277              CP15_InvalidateIcache();
+    278              
+    279              // lockdown all the ways except this in parameter
+    280              victim =  CP15_ReadIcacheLockdown();
+    281              victim = 0;
+    282              victim |= ~index;
+    283              victim &= 0xffff;
+    284              CP15_WriteIcacheLockdown(victim);
+    285          }
+    286          
+    287          //----------------------------------------------------------------------------
+    288          /// Lock D cache
+    289          /// \param D cache way
+    290          //----------------------------------------------------------------------------
+    291          void CP15_LockDcache(unsigned int index)
+    292          {
+    293              unsigned int victim = 0;
+    294          
+    295              // invalidate all the cache (4 ways)    
+    296              CP15_InvalidateDcache();
+    297              
+    298              // lockdown all the ways except this in parameter    
+    299              victim =  CP15_ReadDcacheLockdown();
+    300              victim = 0;
+    301              victim |= ~index;
+    302              victim &= 0xffff;
+    303              CP15_WriteDcacheLockdown(victim);
+    304          }
+    305          
+    306          //----------------------------------------------------------------------------
+    307          /// Lock D cache
+    308          /// \param D cache way
+    309          //----------------------------------------------------------------------------
+    310          void CP15_ShutdownDcache(void)
+    311          { 
+    312              CP15_TestCleanInvalidateDcache();  
+    313              CP15_DrainWriteBuffer();
+    314              CP15_DisableDcache();
+    315              CP15_InvalidateTLB();      
+    316          }
+    317          
+    318          #endif // CP15_PRESENT
+    319          
+
+
+ 
+ 
+ 0 bytes of memory
+
+Errors: none
+Warnings: none

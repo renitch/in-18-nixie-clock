@@ -1,0 +1,225 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BEndpointDescriptor.c                                    #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BEndpointDescriptor.c -D at91sam7s128 -D flash -D        #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBEndpoint #
+#                    Descriptor.lst                                           #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBEndpointD #
+#                    escriptor.o                                              #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\USBEndpointDescriptor.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          /*
+     31              Title: USBEndpointDescriptor implementation
+     32          
+     33              About: Purpose
+     34                  Implementation of the USBEndpointDescriptor class.
+     35          */
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Headers
+     39          //------------------------------------------------------------------------------
+     40          
+     41          #include "USBEndpointDescriptor.h"
+     42          
+     43          //------------------------------------------------------------------------------
+     44          //         Exported functions
+     45          //------------------------------------------------------------------------------
+     46          
+     47          //------------------------------------------------------------------------------
+     48          /// Returns the number of an endpoint given its descriptor.
+     49          /// \param endpoint Pointer to a USBEndpointDescriptor instance.
+     50          /// \return Endpoint number.
+     51          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     52          unsigned char USBEndpointDescriptor_GetNumber(
+     53              const USBEndpointDescriptor *endpoint)
+     54          {
+     55              return endpoint->bEndpointAddress & 0xF;
+   \                     USBEndpointDescriptor_GetNumber:
+   \   00000000   0200D0E5           LDRB     R0,[R0, #+2]
+   \   00000004   0F0000E2           AND      R0,R0,#0xF
+   \   00000008   1EFF2FE1           BX       LR               ;; return
+     56          }
+     57          
+     58          //------------------------------------------------------------------------------
+     59          /// Returns the direction of an endpoint given its descriptor.
+     60          /// \param endpoint Pointer to a USBEndpointDescriptor instance.
+     61          /// \return Endpoint direction (see <Endpoint directions>).
+     62          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     63          unsigned char USBEndpointDescriptor_GetDirection(
+     64              const USBEndpointDescriptor *endpoint)
+     65          {
+     66              if ((endpoint->bEndpointAddress & 0x80) != 0) {
+   \                     USBEndpointDescriptor_GetDirection:
+   \   00000000   0200D0E5           LDRB     R0,[R0, #+2]
+   \   00000004   800010E3           TST      R0,#0x80
+   \   00000008   0100000A           BEQ      ??USBEndpointDescriptor_GetDirection_0
+     67          
+     68                  return USBEndpointDescriptor_IN;
+   \   0000000C   0100A0E3           MOV      R0,#+1
+   \   00000010   1EFF2FE1           BX       LR
+     69              }
+     70              else {
+     71          
+     72                  return USBEndpointDescriptor_OUT;
+   \                     ??USBEndpointDescriptor_GetDirection_0:
+   \   00000014   0000A0E3           MOV      R0,#+0
+   \   00000018   1EFF2FE1           BX       LR               ;; return
+     73              }
+     74          }
+     75          
+     76          //------------------------------------------------------------------------------
+     77          /// Returns the type of an endpoint given its descriptor.
+     78          /// \param endpoint Pointer to a USBEndpointDescriptor instance.
+     79          /// \return Endpoint type (see <Endpoint types>).
+     80          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     81          unsigned char USBEndpointDescriptor_GetType(
+     82              const USBEndpointDescriptor *endpoint)
+     83          {
+     84              return endpoint->bmAttributes & 0x3;
+   \                     USBEndpointDescriptor_GetType:
+   \   00000000   0300D0E5           LDRB     R0,[R0, #+3]
+   \   00000004   030000E2           AND      R0,R0,#0x3
+   \   00000008   1EFF2FE1           BX       LR               ;; return
+     85          }
+     86          
+     87          //------------------------------------------------------------------------------
+     88          /// Returns the maximum size of a packet (in bytes) on an endpoint given
+     89          /// its descriptor.
+     90          /// \param endpoint - Pointer to a USBEndpointDescriptor instance.
+     91          /// \return Maximum packet size of endpoint.
+     92          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     93          unsigned short USBEndpointDescriptor_GetMaxPacketSize(
+     94              const USBEndpointDescriptor *endpoint)
+     95          {
+     96              return endpoint->wMaxPacketSize;
+   \                     USBEndpointDescriptor_GetMaxPacketSize:
+   \   00000000   0510D0E5           LDRB     R1,[R0, #+5]
+   \   00000004   0420D0E5           LDRB     R2,[R0, #+4]
+   \   00000008   010482E1           ORR      R0,R2,R1, LSL #+8
+   \   0000000C   1EFF2FE1           BX       LR               ;; return
+     97          }
+     98          
+     99          //------------------------------------------------------------------------------
+    100          /// Returns the polling interval on an endpoint given its descriptor.
+    101          /// \param endpoint - Pointer to a USBEndpointDescriptor instance.
+    102          /// \return Polling interval of endpoint.
+    103          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    104          unsigned char USBEndpointDescriptor_GetInterval(
+    105              const USBEndpointDescriptor *endpoint)
+    106          {
+    107              return endpoint->bInterval;
+   \                     USBEndpointDescriptor_GetInterval:
+   \   00000000   0600D0E5           LDRB     R0,[R0, #+6]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+    108          }
+    109          
+
+   Maximum stack usage in bytes:
+
+     Function                       .cstack
+     --------                       -------
+     USBEndpointDescriptor_GetDirection
+                                         0
+     USBEndpointDescriptor_GetInterval
+                                         0
+     USBEndpointDescriptor_GetMaxPacketSize
+                                         0
+     USBEndpointDescriptor_GetNumber
+                                         0
+     USBEndpointDescriptor_GetType       0
+
+
+   Section sizes:
+
+     Function/Label                 Bytes
+     --------------                 -----
+     USBEndpointDescriptor_GetNumber
+                                      12
+     USBEndpointDescriptor_GetDirection
+                                      28
+     USBEndpointDescriptor_GetType    12
+     USBEndpointDescriptor_GetMaxPacketSize
+                                      16
+     USBEndpointDescriptor_GetInterval
+                                       8
+
+ 
+ 76 bytes in section .text
+ 
+ 76 bytes of CODE memory
+
+Errors: none
+Warnings: none

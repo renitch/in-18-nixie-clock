@@ -1,0 +1,210 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\boards\at91sam7s-e #
+#                    k\board_memories.c                                       #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\boards\at91sam7s-e #
+#                    k\board_memories.c -D at91sam7s128 -D flash -D           #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\board_memor #
+#                    ies.lst                                                  #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\board_memori #
+#                    es.o                                                     #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\boards\at91sam7s-ek\board_memories.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "board_memories.h"
+     35          #include "board.h"
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Internal definitions
+     39          //------------------------------------------------------------------------------
+     40          
+     41          /// \internal Flash is mirrored in the remap zone.
+     42          #define BOARD_FLASH             0
+     43          
+     44          /// \internal RAM is mirrored in the remap zone.
+     45          #define BOARD_RAM               1
+     46          
+     47          //------------------------------------------------------------------------------
+     48          //         Internal function
+     49          //------------------------------------------------------------------------------
+     50          //------------------------------------------------------------------------------
+     51          /// Returns the current remap, either BOARD_FLASH or BOARD_RAM.
+     52          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     53          static unsigned char BOARD_GetRemap( void )
+     54          {
+     55              unsigned int *remap = (unsigned int *) 0;
+     56              unsigned int *ram = (unsigned int *) AT91C_ISRAM;
+     57          
+     58              // Try to write in 0 and see if this affects the RAM
+     59              unsigned int temp = *ram;
+   \                     BOARD_GetRemap:
+   \   00000000   8009A0E3           MOV      R0,#+2097152
+   \   00000004   001090E5           LDR      R1,[R0, #+0]
+     60              *ram = temp + 1;
+   \   00000008   012081E2           ADD      R2,R1,#+1
+   \   0000000C   002080E5           STR      R2,[R0, #+0]
+     61              if (*remap == *ram) {
+   \   00000010   0020A0E3           MOV      R2,#+0
+   \   00000014   002092E5           LDR      R2,[R2, #+0]
+   \   00000018   003090E5           LDR      R3,[R0, #+0]
+   \   0000001C   030052E1           CMP      R2,R3
+   \   00000020   001080E5           STR      R1,[R0, #+0]
+   \   00000024   0100001A           BNE      ??BOARD_GetRemap_0
+     62          
+     63                  *ram = temp;
+     64                  return BOARD_RAM;
+   \   00000028   0100A0E3           MOV      R0,#+1
+   \   0000002C   1EFF2FE1           BX       LR
+     65              }
+     66              else {
+     67          
+     68                  *ram = temp;
+     69                  return BOARD_FLASH;
+   \                     ??BOARD_GetRemap_0:
+   \   00000030   0000A0E3           MOV      R0,#+0
+   \   00000034   1EFF2FE1           BX       LR               ;; return
+     70              }
+     71          }
+     72          
+     73          //------------------------------------------------------------------------------
+     74          //         Exported functions
+     75          //------------------------------------------------------------------------------
+     76          //------------------------------------------------------------------------------
+     77          /// Changes the mapping of the chip so that the remap area mirrors the
+     78          /// internal flash.
+     79          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     80          void BOARD_RemapFlash( void )
+     81          {
+   \                     BOARD_RemapFlash:
+   \   00000000   00502DE9           PUSH     {R12,LR}
+     82              if (BOARD_GetRemap() != BOARD_FLASH) {
+   \   00000004   ........           BL       BOARD_GetRemap
+   \   00000008   000050E3           CMP      R0,#+0
+     83          
+     84                  AT91C_BASE_MC->MC_RCR = AT91C_MC_RCB;
+   \   0000000C   ........           B        ?Subroutine0
+     85              }
+     86          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?Subroutine0:
+   \   00000000   FF00E013           MVNNE    R0,#+255
+   \   00000004   0110A013           MOVNE    R1,#+1
+   \   00000008   00108015           STRNE    R1,[R0, #+0]
+   \   0000000C   0140BDE8           POP      {R0,LR}
+   \   00000010   1EFF2FE1           BX       LR               ;; return
+     87          
+     88          //------------------------------------------------------------------------------
+     89          /// Changes the mapping of the chip so that the remap area mirrors the
+     90          /// internal RAM.
+     91          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     92          void BOARD_RemapRam( void )
+     93          {
+   \                     BOARD_RemapRam:
+   \   00000000   00502DE9           PUSH     {R12,LR}
+     94              if (BOARD_GetRemap() != BOARD_RAM) {
+   \   00000004   ........           BL       BOARD_GetRemap
+   \   00000008   010050E3           CMP      R0,#+1
+     95          
+     96                  AT91C_BASE_MC->MC_RCR = AT91C_MC_RCB;
+   \   0000000C                      REQUIRE ?Subroutine0
+   \   0000000C                      ;; // Fall through to label ?Subroutine0
+     97              }
+     98          }
+     99          
+
+   Maximum stack usage in bytes:
+
+     Function         .cstack
+     --------         -------
+     BOARD_GetRemap        0
+     BOARD_RemapFlash      8
+     BOARD_RemapRam        8
+
+
+   Section sizes:
+
+     Function/Label   Bytes
+     --------------   -----
+     BOARD_GetRemap     56
+     BOARD_RemapFlash   16
+     ?Subroutine0       20
+     BOARD_RemapRam     12
+
+ 
+ 104 bytes in section .text
+ 
+ 104 bytes of CODE memory
+
+Errors: none
+Warnings: none

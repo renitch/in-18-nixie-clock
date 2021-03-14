@@ -1,0 +1,245 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:53 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\peripherals\dbgu\d #
+#                    bgu.c                                                    #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\peripherals\dbgu\d #
+#                    bgu.c -D at91sam7s128 -D flash -D TRACE_LEVEL=3 -lC      #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\ --remarks  #
+#                    --diag_suppress Pe826,Pe1375 -o                          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\dbgu.lst    #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\dbgu.o       #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\peripherals\dbgu\dbgu.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "dbgu.h"
+     35          #include <board.h>
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Global functions
+     39          //------------------------------------------------------------------------------
+     40          //------------------------------------------------------------------------------
+     41          /// Initializes the DBGU with the given parameters, and enables both the
+     42          /// transmitter and the receiver. The mode parameter contains the value of the
+     43          /// DBGU_MR register.
+     44          /// Value DBGU_STANDARD can be used for mode to get the most common configuration
+     45          /// (i.e. aysnchronous, 8bits, no parity, 1 stop bit, no flow control).
+     46          /// \param mode  Operating mode to configure.
+     47          /// \param baudrate  Desired baudrate (e.g. 115200).
+     48          /// \param mck  Frequency of the system master clock in Hz.
+     49          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     50          void DBGU_Configure(
+     51              unsigned int mode,
+     52              unsigned int baudrate,
+     53              unsigned int mck)
+     54          {
+   \                     DBGU_Configure:
+   \   00000000   30402DE9           PUSH     {R4,R5,LR}
+   \   00000004   0050A0E1           MOV      R5,R0
+   \   00000008   0200A0E1           MOV      R0,R2
+     55              #if defined(cortexm3)
+     56              // Enable clock for UART
+     57              AT91C_BASE_PMC->PMC_PCER = (1 << AT91C_ID_DBGU);
+     58              #endif
+     59          
+     60              // Reset & disable receiver and transmitter, disable interrupts
+     61              AT91C_BASE_DBGU->DBGU_CR = AT91C_US_RSTRX | AT91C_US_RSTTX;
+   \   0000000C   FF40E0E3           MVN      R4,#+255
+   \   00000010   D04EC4E3           BIC      R4,R4,#0xD00
+   \   00000014   0C20A0E3           MOV      R2,#+12
+   \   00000018   002084E5           STR      R2,[R4, #+0]
+     62              AT91C_BASE_DBGU->DBGU_IDR = 0xFFFFFFFF;
+   \   0000001C   0030E0E3           MVN      R3,#+0
+   \   00000020   003E02E5           STR      R3,[R2, #-3584]
+     63              
+     64              // Configure baud rate
+     65              AT91C_BASE_DBGU->DBGU_BRGR = mck / (baudrate * 16);
+   \   00000024   0112A0E1           LSL      R1,R1,#+4
+   \   00000028   ........           BL       __aeabi_uidiv
+   \   0000002C   2010A0E3           MOV      R1,#+32
+   \   00000030   000E01E5           STR      R0,[R1, #-3584]
+     66              
+     67              // Configure mode register
+     68              AT91C_BASE_DBGU->DBGU_MR = mode;
+   \   00000034   0400A0E3           MOV      R0,#+4
+   \   00000038   005E00E5           STR      R5,[R0, #-3584]
+     69              
+     70              // Disable DMA channel
+     71              AT91C_BASE_DBGU->DBGU_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
+   \   0000003C   480FA0E3           MOV      R0,#+288
+   \   00000040   E21080E2           ADD      R1,R0,#+226
+   \   00000044   001E00E5           STR      R1,[R0, #-3584]
+     72          
+     73              // Enable receiver and transmitter
+     74              AT91C_BASE_DBGU->DBGU_CR = AT91C_US_RXEN | AT91C_US_TXEN;
+   \   00000048   5000A0E3           MOV      R0,#+80
+   \   0000004C   000084E5           STR      R0,[R4, #+0]
+     75          }
+   \   00000050   3040BDE8           POP      {R4,R5,LR}
+   \   00000054   1EFF2FE1           BX       LR               ;; return
+     76          
+     77          //------------------------------------------------------------------------------
+     78          /// Outputs a character on the DBGU line.
+     79          /// \note This function is synchronous (i.e. uses polling).
+     80          /// \param c  Character to send.
+     81          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     82          void DBGU_PutChar(unsigned char c)
+     83          {
+   \                     DBGU_PutChar:
+   \   00000000   EB10E0E3           MVN      R1,#+235
+   \   00000004   D01EC1E3           BIC      R1,R1,#0xD00
+     84              // Wait for the transmitter to be ready
+     85              while ((AT91C_BASE_DBGU->DBGU_CSR & AT91C_US_TXEMPTY) == 0);
+   \                     ??DBGU_PutChar_0:
+   \   00000008   002091E5           LDR      R2,[R1, #+0]
+   \   0000000C   800F12E3           TST      R2,#0x200
+   \   00000010   FCFFFF0A           BEQ      ??DBGU_PutChar_0
+     86              
+     87              // Send character
+     88              AT91C_BASE_DBGU->DBGU_THR = c;
+   \   00000014   0820A0E3           MOV      R2,#+8
+   \   00000018   EC0D02E5           STR      R0,[R2, #-3564]
+     89              
+     90              // Wait for the transfer to complete
+     91              while ((AT91C_BASE_DBGU->DBGU_CSR & AT91C_US_TXEMPTY) == 0);
+   \                     ??DBGU_PutChar_1:
+   \   0000001C   000091E5           LDR      R0,[R1, #+0]
+   \   00000020   800F10E3           TST      R0,#0x200
+   \   00000024   FCFFFF0A           BEQ      ??DBGU_PutChar_1
+     92          }
+   \   00000028   1EFF2FE1           BX       LR               ;; return
+     93          
+     94          //------------------------------------------------------------------------------
+     95          /// Return 1 if a character can be read in DBGU
+     96          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     97          unsigned int DBGU_IsRxReady()
+     98          {
+     99              return (AT91C_BASE_DBGU->DBGU_CSR & AT91C_US_RXRDY);
+   \                     DBGU_IsRxReady:
+   \   00000000   EB00E0E3           MVN      R0,#+235
+   \   00000004   D00EC0E3           BIC      R0,R0,#0xD00
+   \   00000008   000090E5           LDR      R0,[R0, #+0]
+   \   0000000C   010000E2           AND      R0,R0,#0x1
+   \   00000010   1EFF2FE1           BX       LR               ;; return
+    100          }
+    101          
+    102          //------------------------------------------------------------------------------
+    103          /// Reads and returns a character from the DBGU.
+    104          /// \note This function is synchronous (i.e. uses polling).
+    105          /// \return Character received.
+    106          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    107          unsigned char DBGU_GetChar(void)
+    108          {
+    109              while ((AT91C_BASE_DBGU->DBGU_CSR & AT91C_US_RXRDY) == 0);
+   \                     DBGU_GetChar:
+   \                     ??DBGU_GetChar_0:
+   \   00000000   EB00E0E3           MVN      R0,#+235
+   \   00000004   D00EC0E3           BIC      R0,R0,#0xD00
+   \   00000008   000090E5           LDR      R0,[R0, #+0]
+   \   0000000C   010010E3           TST      R0,#0x1
+   \   00000010   FAFFFF0A           BEQ      ??DBGU_GetChar_0
+    110              return AT91C_BASE_DBGU->DBGU_RHR;
+   \   00000014   0400A0E3           MOV      R0,#+4
+   \   00000018   EC0D10E5           LDR      R0,[R0, #-3564]
+   \   0000001C   FF0000E2           AND      R0,R0,#0xFF
+   \   00000020   1EFF2FE1           BX       LR               ;; return
+    111          }
+    112          
+    113          
+    114          
+
+   Maximum stack usage in bytes:
+
+     Function       .cstack
+     --------       -------
+     DBGU_Configure     12
+     DBGU_GetChar        0
+     DBGU_IsRxReady      0
+     DBGU_PutChar        0
+
+
+   Section sizes:
+
+     Function/Label Bytes
+     -------------- -----
+     DBGU_Configure   88
+     DBGU_PutChar     44
+     DBGU_IsRxReady   20
+     DBGU_GetChar     36
+
+ 
+ 188 bytes in section .text
+ 
+ 188 bytes of CODE memory
+
+Errors: none
+Warnings: none

@@ -1,0 +1,145 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:51 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BDCallbacks_Initialized.c                                #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BDCallbacks_Initialized.c -D at91sam7s128 -D flash -D    #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBDCallbac #
+#                    ks_Initialized.lst                                       #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBDCallback #
+#                    s_Initialized.o                                          #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\USBDCallbacks_Initialized.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "USBDCallbacks.h"
+     35          #include "USBD.h"
+     36          #include <board.h>
+     37          #include <irq/irq.h>
+     38          
+     39          //------------------------------------------------------------------------------
+     40          //         Exported function
+     41          //------------------------------------------------------------------------------
+     42          
+     43          //------------------------------------------------------------------------------
+     44          /// Invoked after the USB driver has been initialized. By default, configures
+     45          /// the UDP/UDPHS interrupt.
+     46          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     47          void USBDCallbacks_Initialized(void)
+     48          {
+   \                     USBDCallbacks_Initialized:
+   \   00000000   00502DE9           PUSH     {R12,LR}
+     49          #if defined(BOARD_USB_UDP)
+     50              // Configure and enable the UDP interrupt
+     51              IRQ_ConfigureIT(AT91C_ID_UDP, 0, UDPD_IrqHandler);//, UDPD_IrqHandler);
+   \   00000004   14209FE5           LDR      R2,??USBDCallbacks_Initialized_0
+   \   00000008   0010A0E3           MOV      R1,#+0
+   \   0000000C   0B00A0E3           MOV      R0,#+11
+   \   00000010   ........           BL       IRQ_ConfigureIT
+     52              IRQ_EnableIT(AT91C_ID_UDP);
+   \   00000014   0B00A0E3           MOV      R0,#+11
+   \   00000018   0240BDE8           POP      {R1,LR}
+   \   0000001C   ........           B        IRQ_EnableIT     ;; tailcall
+   \                     ??USBDCallbacks_Initialized_0:
+   \   00000020   ........           DC32     UDPD_IrqHandler
+     53          
+     54          #elif defined(BOARD_USB_UDPHS)
+     55              // Configure and enable the UDPHS interrupt
+     56              IRQ_ConfigureIT(AT91C_ID_UDPHS, 0, UDPD_IrqHandler);//, UDPD_IrqHandler);
+     57              IRQ_EnableIT(AT91C_ID_UDPHS);
+     58          
+     59          #elif defined(BOARD_USB_OTGHS)
+     60              IRQ_ConfigureIT(AT91C_ID_OTGHS, 1, UDPD_IrqHandler);
+     61              IRQ_EnableIT(AT91C_ID_OTGHS);
+     62          
+     63          #else
+     64              #error Unsupported controller.
+     65          #endif
+     66          }
+     67          
+
+   Maximum stack usage in bytes:
+
+     Function                  .cstack
+     --------                  -------
+     USBDCallbacks_Initialized      8
+
+
+   Section sizes:
+
+     Function/Label            Bytes
+     --------------            -----
+     USBDCallbacks_Initialized   36
+
+ 
+ 36 bytes in section .text
+ 
+ 36 bytes of CODE memory
+
+Errors: none
+Warnings: none

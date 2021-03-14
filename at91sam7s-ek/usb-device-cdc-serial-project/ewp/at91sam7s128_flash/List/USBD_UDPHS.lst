@@ -1,0 +1,1746 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BD_UDPHS.c                                               #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BD_UDPHS.c -D at91sam7s128 -D flash -D TRACE_LEVEL=3     #
+#                    -lC C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\at91sam7s128_flash\List\        #
+#                    --remarks --diag_suppress Pe826,Pe1375 -o                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBD_UDPHS. #
+#                    lst                                                      #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBD_UDPHS.o #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\USBD_UDPHS.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "USBD.h"
+     35          #include "USBDCallbacks.h"
+     36          #include "USBDDriver.h"
+     37          #include <board.h>
+     38          #include <pio/pio.h>
+     39          #include <utility/trace.h>
+     40          #include <utility/led.h>
+     41          #include <usb/common/core/USBEndpointDescriptor.h>
+     42          #include <usb/common/core/USBGenericRequest.h>
+     43          #include <usb/common/core/USBFeatureRequest.h>
+     44          
+     45          #include <stdio.h>
+     46          
+     47          #ifdef BOARD_USB_UDPHS
+     48          
+     49          //------------------------------------------------------------------------------
+     50          //         Definitions
+     51          //------------------------------------------------------------------------------
+     52          
+     53          /// Maximum number of endpoints interrupts.
+     54          #define NUM_IT_MAX       \
+     55              (AT91C_BASE_UDPHS->UDPHS_IPFEATURES & AT91C_UDPHS_EPT_NBR_MAX)
+     56          /// Maximum number of endpoint DMA interrupts
+     57          #define NUM_IT_MAX_DMA   \
+     58              ((AT91C_BASE_UDPHS->UDPHS_IPFEATURES & AT91C_UDPHS_DMA_CHANNEL_NBR)>>4)
+     59          /// Bits that should be shifted to access DMA control bits.
+     60          #define SHIFT_DMA        24
+     61          /// Bits that should be shifted to access interrupt bits.
+     62          #define SHIFT_INTERUPT    8
+     63          
+     64          /// Compile option, use DMA. Remove this define for not use DMA.
+     65          #define DMA
+     66          
+     67          /// Max size of the FMA FIFO
+     68          #define DMA_MAX_FIFO_SIZE     65536
+     69          
+     70          #define EPT_VIRTUAL_SIZE      16384
+     71          
+     72          //------------------------------------------------------------------------------
+     73          /// \page "Endpoint states"
+     74          /// This page lists the endpoint states.
+     75          /// !States
+     76          //  - UDP_ENDPOINT_DISABLED
+     77          //  - UDP_ENDPOINT_HALTED
+     78          //  - UDP_ENDPOINT_IDLE
+     79          //  - UDP_ENDPOINT_SENDING
+     80          //  - UDP_ENDPOINT_RECEIVING
+     81          
+     82          /// Endpoint states: Endpoint is disabled
+     83          #define UDP_ENDPOINT_DISABLED       0
+     84          /// Endpoint states: Endpoint is halted (i.e. STALLs every request)
+     85          #define UDP_ENDPOINT_HALTED         1
+     86          /// Endpoint states: Endpoint is idle (i.e. ready for transmission)
+     87          #define UDP_ENDPOINT_IDLE           2
+     88          /// Endpoint states: Endpoint is sending data
+     89          #define UDP_ENDPOINT_SENDING        3
+     90          /// Endpoint states: Endpoint is receiving data
+     91          #define UDP_ENDPOINT_RECEIVING      4
+     92          //------------------------------------------------------------------------------
+     93          
+     94          //------------------------------------------------------------------------------
+     95          //      Structures
+     96          //------------------------------------------------------------------------------
+     97          
+     98          /// Describes an ongoing transfer on a UDP endpoint.
+     99          typedef struct
+    100          {
+    101              /// Pointer to a data buffer used for emission/reception.
+    102              char             *pData;
+    103              /// Number of bytes which have been written into the UDP internal FIFO
+    104              /// buffers.
+    105              volatile int     buffered;
+    106              /// Number of bytes which have been sent/received.
+    107              volatile int     transferred;
+    108              /// Number of bytes which have not been buffered/transferred yet.
+    109              volatile int     remaining;
+    110              /// Optional callback to invoke when the transfer completes.
+    111              volatile TransferCallback fCallback;
+    112              /// Optional argument to the callback function.
+    113              void             *pArgument;
+    114          } Transfer;
+    115          
+    116          //------------------------------------------------------------------------------
+    117          /// Describes the state of an endpoint of the UDP controller.
+    118          //------------------------------------------------------------------------------
+    119          typedef struct
+    120          {
+    121              /// Current endpoint state.
+    122              volatile unsigned char  state;
+    123              /// Current reception bank (0 or 1).
+    124              unsigned char  bank;
+    125              /// Maximum packet size for the endpoint.
+    126              unsigned short size;
+    127              /// Describes an ongoing transfer (if current state is either
+    128              ///  <UDP_ENDPOINT_SENDING> or <UDP_ENDPOINT_RECEIVING>)
+    129              Transfer       transfer;
+    130              /// Special case for send a ZLP
+    131              unsigned char  sendZLP;
+    132          } Endpoint;
+    133          
+    134          //------------------------------------------------------------------------------
+    135          //         Internal variables
+    136          //------------------------------------------------------------------------------
+    137          
+    138          /// Holds the internal state for each endpoint of the UDP.
+    139          static Endpoint      endpoints[BOARD_USB_NUMENDPOINTS];
+    140          /// Device current state.
+    141          static unsigned char deviceState;
+    142          /// Indicates the previous device state
+    143          static unsigned char previousDeviceState;
+    144          
+    145          /// 7.1.20 Test Mode Support
+    146          /// Test codes for the USB HS test mode.
+    147          static const char test_packet_buffer[] = {
+    148              0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,                // JKJKJKJK * 9
+    149              0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,                     // JJKKJJKK * 8
+    150              0xEE,0xEE,0xEE,0xEE,0xEE,0xEE,0xEE,0xEE,                     // JJJJKKKK * 8
+    151              0xFE,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, // JJJJJJJKKKKKKK * 8
+    152              0x7F,0xBF,0xDF,0xEF,0xF7,0xFB,0xFD,                          // JJJJJJJK * 8
+    153              0xFC,0x7E,0xBF,0xDF,0xEF,0xF7,0xFB,0xFD,0x7E                 // {JKKKKKKK * 10}, JK
+    154          };
+    155          
+    156          // Force HS
+    157          static const unsigned char forceUsbFS = 0;
+    158          
+    159          //------------------------------------------------------------------------------
+    160          //      Internal Functions
+    161          //------------------------------------------------------------------------------
+    162          
+    163          //------------------------------------------------------------------------------
+    164          /// Disables the BIAS of the USB controller
+    165          //------------------------------------------------------------------------------
+    166          static inline void UDPHS_DisableBIAS( void )
+    167          {
+    168              // For CAP9, SAM9RL, HS
+    169          #if !defined (BOARD_USB_NO_BIAS_COMMAND)
+    170              AT91C_BASE_PMC->PMC_UCKR &= ~AT91C_CKGR_BIASEN_ENABLED;
+    171          #endif
+    172          }
+    173          
+    174          //------------------------------------------------------------------------------
+    175          /// Enables the BIAS of the USB controller
+    176          //------------------------------------------------------------------------------
+    177          static inline void UDPHS_EnableBIAS( void )
+    178          {
+    179              // For CAP9, SAM9RL, HS
+    180          #if !defined (BOARD_USB_NO_BIAS_COMMAND)
+    181              UDPHS_DisableBIAS();
+    182              AT91C_BASE_PMC->PMC_UCKR |= AT91C_CKGR_BIASEN_ENABLED;
+    183          #endif
+    184          }
+    185          
+    186          //------------------------------------------------------------------------------
+    187          /// Enable UDPHS clock
+    188          //------------------------------------------------------------------------------
+    189          static inline void UDPHS_EnableUsbClock( void )
+    190          {
+    191          #if !defined (PMC_BY_HARD)
+    192              AT91C_BASE_PMC->PMC_PCER = (1 << AT91C_ID_UDPHS);
+    193              // Enable 480MHZ
+    194              //AT91C_BASE_CKGR->CKGR_UCKR |= (AT91C_CKGR_PLLCOUNT & (3 << 20)) | AT91C_CKGR_UPLLEN;
+    195              AT91C_BASE_CKGR->CKGR_UCKR |= ((0xf << 20) & (3 << 20)) | AT91C_CKGR_UPLLEN;
+    196              // Wait until UTMI PLL is locked
+    197              while ((AT91C_BASE_PMC->PMC_SR & AT91C_PMC_LOCKU) == 0);
+    198          #endif
+    199          }
+    200          
+    201          //------------------------------------------------------------------------------
+    202          /// Disable UDPHS clock
+    203          //------------------------------------------------------------------------------
+    204          static inline void UDPHS_DisableUsbClock( void )
+    205          {
+    206          #if !defined (PMC_BY_HARD)
+    207              AT91C_BASE_PMC->PMC_PCDR = (1 << AT91C_ID_UDPHS);
+    208              // 480MHZ
+    209              AT91C_BASE_CKGR->CKGR_UCKR &= ~AT91C_CKGR_UPLLEN;
+    210          #endif
+    211          }
+    212          
+    213          //------------------------------------------------------------------------------
+    214          /// Handles a completed transfer on the given endpoint, invoking the
+    215          /// configured callback if any.
+    216          /// \param bEndpoint Number of the endpoint for which the transfer has completed.
+    217          /// \param bStatus   Status code returned by the transfer operation
+    218          //------------------------------------------------------------------------------
+    219          static void UDPHS_EndOfTransfer( unsigned char bEndpoint, char bStatus )
+    220          {
+    221              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+    222              Transfer *pTransfer = &(pEndpoint->transfer);
+    223          
+    224              // Check that endpoint was sending or receiving data
+    225              if( (pEndpoint->state == UDP_ENDPOINT_RECEIVING)
+    226               || (pEndpoint->state == UDP_ENDPOINT_SENDING) ) {
+    227          
+    228                  TRACE_DEBUG_WP("Eo");
+    229                  if(pEndpoint->state == UDP_ENDPOINT_SENDING) {
+    230                      pEndpoint->sendZLP = 0;
+    231                  }
+    232                  // Endpoint returns in Idle state
+    233                  pEndpoint->state = UDP_ENDPOINT_IDLE;
+    234          
+    235                  // Invoke callback is present
+    236                  if (pTransfer->fCallback != 0) {
+    237          
+    238                      ((TransferCallback) pTransfer->fCallback)
+    239                          (pTransfer->pArgument,
+    240                           bStatus,
+    241                           pTransfer->transferred,
+    242                           pTransfer->remaining + pTransfer->buffered);
+    243                  }
+    244                  else {
+    245                      TRACE_DEBUG_WP("No callBack\n\r");
+    246                  }
+    247              }
+    248          }
+    249          
+    250          //------------------------------------------------------------------------------
+    251          /// Clears the correct RX flag in endpoint status register
+    252          /// \param bEndpoint Index of endpoint
+    253          //------------------------------------------------------------------------------
+    254          static void UDPHS_ClearRxFlag( unsigned char bEndpoint )
+    255          {
+    256              AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCLRSTA = AT91C_UDPHS_RX_BK_RDY;
+    257          }
+    258          
+    259          //------------------------------------------------------------------------------
+    260          /// Transfers a data payload from the current tranfer buffer to the endpoint
+    261          /// FIFO
+    262          /// \param bEndpoint Number of the endpoint which is sending data.
+    263          //------------------------------------------------------------------------------
+    264          static void UDPHS_WritePayload( unsigned char bEndpoint )
+    265          {
+    266              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+    267              Transfer *pTransfer = &(pEndpoint->transfer);
+    268              char     *pFifo;
+    269              signed int   size;
+    270              unsigned int dCtr;
+    271          
+    272              pFifo = (char*)((unsigned int *)AT91C_BASE_UDPHS_EPTFIFO + (EPT_VIRTUAL_SIZE * bEndpoint));
+    273          
+    274              // Get the number of bytes to send
+    275              size = pEndpoint->size;
+    276              if (size > pTransfer->remaining) {
+    277          
+    278                  size = pTransfer->remaining;
+    279              }
+    280          
+    281              // Update transfer descriptor information
+    282              pTransfer->buffered += size;
+    283              pTransfer->remaining -= size;
+    284          
+    285              // Write packet in the FIFO buffer
+    286              dCtr = 0;
+    287              while (size > 0) {
+    288          
+    289                  pFifo[dCtr] = *(pTransfer->pData);
+    290                  pTransfer->pData++;
+    291                  size--;
+    292                  dCtr++;
+    293              }
+    294          }
+    295          
+    296          //------------------------------------------------------------------------------
+    297          /// Transfers a data payload from an endpoint FIFO to the current transfer buffer
+    298          /// \param bEndpoint   Endpoint number.
+    299          /// \param wPacketSize Size of received data packet
+    300          //------------------------------------------------------------------------------
+    301          static void UDPHS_ReadPayload( unsigned char bEndpoint, int wPacketSize )
+    302          {
+    303              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+    304              Transfer *pTransfer = &(pEndpoint->transfer);
+    305              char     *pFifo;
+    306              unsigned char dBytes=0;
+    307          
+    308              pFifo = (char*)((unsigned int *)AT91C_BASE_UDPHS_EPTFIFO + (EPT_VIRTUAL_SIZE * bEndpoint));
+    309          
+    310              // Check that the requested size is not bigger than the remaining transfer
+    311              if (wPacketSize > pTransfer->remaining) {
+    312          
+    313                  pTransfer->buffered += wPacketSize - pTransfer->remaining;
+    314                  wPacketSize = pTransfer->remaining;
+    315              }
+    316          
+    317              // Update transfer descriptor information
+    318              pTransfer->remaining -= wPacketSize;
+    319              pTransfer->transferred += wPacketSize;
+    320          
+    321              // Retrieve packet
+    322              while (wPacketSize > 0) {
+    323          
+    324                  *(pTransfer->pData) = pFifo[dBytes];
+    325                  pTransfer->pData++;
+    326                  wPacketSize--;
+    327                  dBytes++;
+    328              }
+    329          }
+    330          
+    331          
+    332          //------------------------------------------------------------------------------
+    333          /// Received SETUP packet from endpoint 0 FIFO
+    334          /// \param pRequest Generic USB SETUP request sent over Control endpoints
+    335          //------------------------------------------------------------------------------
+    336          static void UDPHS_ReadRequest( USBGenericRequest *pRequest )
+    337          {
+    338              unsigned int *pData = (unsigned int *)pRequest;
+    339              unsigned int fifo;
+    340          
+    341              fifo = (AT91C_BASE_UDPHS_EPTFIFO->UDPHS_READEPT0[0]);
+    342              *pData = fifo;
+    343              fifo = (AT91C_BASE_UDPHS_EPTFIFO->UDPHS_READEPT0[0]);
+    344              pData++;
+    345              *pData = fifo;
+    346              //TRACE_ERROR("SETUP: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n\r", pData[0],pData[1],pData[2],pData[3],pData[4],pData[5],pData[6],pData[7]);
+    347          }
+    348          
+    349          //------------------------------------------------------------------------------
+    350          /// Reset all endpoint transfer descriptors
+    351          //------------------------------------------------------------------------------
+    352          static void UDPHS_ResetEndpoints( void )
+    353          {
+    354              Endpoint *pEndpoint;
+    355              Transfer *pTransfer;
+    356              unsigned char bEndpoint;
+    357          
+    358              // Reset the transfer descriptor of every endpoint
+    359              for( bEndpoint = 0; bEndpoint < BOARD_USB_NUMENDPOINTS; bEndpoint++ ) {
+    360          
+    361                  pEndpoint = &(endpoints[bEndpoint]);
+    362                  pTransfer = &(pEndpoint->transfer);
+    363          
+    364                  // Reset endpoint transfer descriptor
+    365                  pTransfer->pData = 0;
+    366                  pTransfer->transferred = -1;
+    367                  pTransfer->buffered = -1;
+    368                  pTransfer->remaining = -1;
+    369                  pTransfer->fCallback = 0;
+    370                  pTransfer->pArgument = 0;
+    371          
+    372                  // Reset endpoint state
+    373                  pEndpoint->bank = 0;
+    374                  pEndpoint->state = UDP_ENDPOINT_DISABLED;
+    375                  // Reset ZLP
+    376                  pEndpoint->sendZLP = 0;
+    377              }
+    378          }
+    379          
+    380          
+    381          //------------------------------------------------------------------------------
+    382          /// Disable all endpoints (except control endpoint 0), aborting current 
+    383          /// transfers if necessary
+    384          //------------------------------------------------------------------------------
+    385          static void UDPHS_DisableEndpoints( void )
+    386          {
+    387              unsigned char bEndpoint;
+    388          
+    389              // Disable each endpoint, terminating any pending transfer
+    390              // Control endpoint 0 is not disabled
+    391              for( bEndpoint = 1; bEndpoint < BOARD_USB_NUMENDPOINTS; bEndpoint++ ) {
+    392          
+    393                  UDPHS_EndOfTransfer( bEndpoint, USBD_STATUS_ABORTED );
+    394                  endpoints[bEndpoint].state = UDP_ENDPOINT_DISABLED;
+    395              }
+    396          }
+    397          
+    398          //------------------------------------------------------------------------------
+    399          /// Endpoint interrupt handler.
+    400          /// Handle IN/OUT transfers, received SETUP packets and STALLing
+    401          /// \param bEndpoint Index of endpoint
+    402          //------------------------------------------------------------------------------
+    403          static void UDPHS_EndpointHandler( unsigned char bEndpoint )
+    404          {
+    405              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+    406              Transfer *pTransfer = &(pEndpoint->transfer);
+    407              unsigned int   status = AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTSTA;
+    408              unsigned short wPacketSize;
+    409              USBGenericRequest request;
+    410          
+    411              TRACE_DEBUG_WP("E%d ", bEndpoint);
+    412              TRACE_DEBUG_WP("st:0x%X ", status);
+    413          
+    414              // Handle interrupts
+    415              // IN packet sent
+    416              if( (AT91C_UDPHS_TX_PK_RDY == (AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTL & AT91C_UDPHS_TX_PK_RDY))
+    417               && (0 == (status & AT91C_UDPHS_TX_PK_RDY )) ) {
+    418          
+    419                  TRACE_DEBUG_WP("Wr ");
+    420          
+    421                  // Check that endpoint was in Sending state
+    422                  if( pEndpoint->state == UDP_ENDPOINT_SENDING ) {
+    423          
+    424                      if (pTransfer->buffered > 0) {
+    425                          pTransfer->transferred += pTransfer->buffered;
+    426                          pTransfer->buffered = 0;
+    427                      }
+    428          
+    429                      if(  ((pTransfer->buffered)==0)
+    430                         &&((pTransfer->transferred)==0)
+    431                         &&((pTransfer->remaining)==0)
+    432                         &&(pEndpoint->sendZLP == 0)) {
+    433                          pEndpoint->sendZLP = 1;
+    434                      }
+    435          
+    436                      // End of transfer ?
+    437                      if( (pTransfer->remaining > 0)
+    438                        ||(pEndpoint->sendZLP == 1)) {
+    439          
+    440                          pEndpoint->sendZLP = 2;
+    441                          TRACE_DEBUG_WP("\n\r1pTransfer->buffered %d \n\r", pTransfer->buffered);
+    442                          TRACE_DEBUG_WP("1pTransfer->transferred %d \n\r", pTransfer->transferred);
+    443                          TRACE_DEBUG_WP("1pTransfer->remaining %d \n\r", pTransfer->remaining);
+    444          
+    445                          // Transfer remaining data
+    446                          TRACE_DEBUG_WP(" %d ", pEndpoint->size);
+    447          
+    448                          // Send next packet
+    449                          UDPHS_WritePayload(bEndpoint);
+    450                          AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTSETSTA = AT91C_UDPHS_TX_PK_RDY;
+    451                      }
+    452                      else {
+    453                          TRACE_DEBUG_WP("\n\r0pTransfer->buffered %d \n\r", pTransfer->buffered);
+    454                          TRACE_DEBUG_WP("0pTransfer->transferred %d \n\r", pTransfer->transferred);
+    455                          TRACE_DEBUG_WP("0pTransfer->remaining %d \n\r", pTransfer->remaining);
+    456          
+    457                          TRACE_DEBUG_WP(" %d ", pTransfer->transferred);
+    458          
+    459                          // Disable interrupt if this is not a control endpoint
+    460                          if( AT91C_UDPHS_EPT_TYPE_CTL_EPT != (AT91C_UDPHS_EPT_TYPE&(AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG)) ) {
+    461          
+    462                              AT91C_BASE_UDPHS->UDPHS_IEN &= ~(1<<SHIFT_INTERUPT<<bEndpoint);
+    463                          }
+    464                          AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLDIS = AT91C_UDPHS_TX_PK_RDY;
+    465          
+    466                          UDPHS_EndOfTransfer(bEndpoint, USBD_STATUS_SUCCESS);
+    467                          pEndpoint->sendZLP = 0;
+    468                      }
+    469                  }
+    470                  else {
+    471          
+    472                        TRACE_DEBUG("Error Wr %d", pEndpoint->sendZLP);
+    473                  }
+    474              }
+    475          
+    476              // OUT packet received
+    477              if( AT91C_UDPHS_RX_BK_RDY == (status & AT91C_UDPHS_RX_BK_RDY) ) {
+    478          
+    479                  TRACE_DEBUG_WP("Rd ");
+    480          
+    481                  // Check that the endpoint is in Receiving state
+    482                  if (pEndpoint->state != UDP_ENDPOINT_RECEIVING) {
+    483          
+    484                      // Check if an ACK has been received on a Control endpoint
+    485                      if( (0 == (AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG & AT91C_UDPHS_EPT_TYPE))
+    486                       && (0 == (status & AT91C_UDPHS_BYTE_COUNT)) ) {
+    487          
+    488                          // Control endpoint, 0 bytes received
+    489                          // Acknowledge the data and finish the current transfer
+    490                          TRACE_DEBUG_WP("Ack ");
+    491                          UDPHS_ClearRxFlag(bEndpoint);
+    492                          UDPHS_EndOfTransfer(bEndpoint, USBD_STATUS_SUCCESS);
+    493                          //todo remove endoftranfer and test
+    494                      }
+    495                      // Check if the data has been STALLed
+    496                      else if( AT91C_UDPHS_FRCESTALL == (status & AT91C_UDPHS_FRCESTALL)) {
+    497          
+    498                          // Discard STALLed data
+    499                          TRACE_DEBUG_WP("Discard ");
+    500                          UDPHS_ClearRxFlag(bEndpoint);
+    501                      }
+    502                      // NAK the data
+    503                      else {
+    504          
+    505                          TRACE_DEBUG_WP("Nak ");
+    506                          AT91C_BASE_UDPHS->UDPHS_IEN &= ~(1<<SHIFT_INTERUPT<<bEndpoint);
+    507                      }
+    508                  }
+    509                  else {
+    510          
+    511                      // Endpoint is in Read state
+    512                      // Retrieve data and store it into the current transfer buffer
+    513                      wPacketSize = (unsigned short)((status & AT91C_UDPHS_BYTE_COUNT)>>20);
+    514          
+    515                      TRACE_DEBUG_WP("%d ", wPacketSize);
+    516                      UDPHS_ReadPayload(bEndpoint, wPacketSize);
+    517                      UDPHS_ClearRxFlag(bEndpoint);
+    518          
+    519                      // Check if the transfer is finished
+    520                      if ((pTransfer->remaining == 0) || (wPacketSize < pEndpoint->size)) {
+    521          
+    522                          AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLDIS = AT91C_UDPHS_RX_BK_RDY;
+    523          
+    524                          // Disable interrupt if this is not a control endpoint
+    525                          if( AT91C_UDPHS_EPT_TYPE_CTL_EPT != (AT91C_UDPHS_EPT_TYPE & (AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG)) ) {
+    526          
+    527                              AT91C_BASE_UDPHS->UDPHS_IEN &= ~(1<<SHIFT_INTERUPT<<bEndpoint);
+    528                          }
+    529                          UDPHS_EndOfTransfer(bEndpoint, USBD_STATUS_SUCCESS);
+    530                      }
+    531                  }
+    532              }
+    533          
+    534          
+    535              // STALL sent
+    536              if( AT91C_UDPHS_STALL_SNT == (status & AT91C_UDPHS_STALL_SNT) ) {
+    537          
+    538                  TRACE_WARNING( "Sta 0x%X [%d] ", status, bEndpoint);
+    539          
+    540                  // Acknowledge the stall flag
+    541                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCLRSTA = AT91C_UDPHS_STALL_SNT;
+    542          
+    543                  // If the endpoint is not halted, clear the STALL condition
+    544                  if (pEndpoint->state != UDP_ENDPOINT_HALTED) {
+    545          
+    546                      TRACE_WARNING( "_ " );
+    547                      AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCLRSTA = AT91C_UDPHS_FRCESTALL;
+    548                  }
+    549              }
+    550          
+    551              // SETUP packet received
+    552              if( AT91C_UDPHS_RX_SETUP == (status & AT91C_UDPHS_RX_SETUP) )  {
+    553          
+    554                  TRACE_DEBUG_WP("Stp ");
+    555          
+    556                  // If a transfer was pending, complete it
+    557                  // Handles the case where during the status phase of a control write
+    558                  // transfer, the host receives the device ZLP and ack it, but the ack
+    559                  // is not received by the device
+    560                  if ((pEndpoint->state == UDP_ENDPOINT_RECEIVING)
+    561                      || (pEndpoint->state == UDP_ENDPOINT_SENDING)) {
+    562          
+    563                      UDPHS_EndOfTransfer(bEndpoint, USBD_STATUS_SUCCESS);
+    564                  }
+    565                  // Copy the setup packet
+    566                  UDPHS_ReadRequest(&request);
+    567          
+    568                  // Acknowledge setup packet
+    569                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCLRSTA = AT91C_UDPHS_RX_SETUP;
+    570          
+    571                  // Forward the request to the upper layer
+    572                  USBDCallbacks_RequestReceived(&request);
+    573              }
+    574          
+    575          }
+    576          
+    577          //------------------------------------------------------------------------------
+    578          //      Interrupt service routine
+    579          //------------------------------------------------------------------------------
+    580          #ifdef DMA
+    581          //----------------------------------------------------------------------------
+    582          /// Endpoint DMA interrupt handler.
+    583          /// This function (ISR) handles dma interrupts
+    584          /// \param bEndpoint Index of endpoint
+    585          //----------------------------------------------------------------------------
+    586          static void UDPHS_DmaHandler( unsigned char bEndpoint )
+    587          {
+    588              Endpoint     *pEndpoint = &(endpoints[bEndpoint]);
+    589              Transfer     *pTransfer = &(pEndpoint->transfer);
+    590              int           justTransferred;
+    591              unsigned int  status;
+    592              unsigned char result = USBD_STATUS_SUCCESS;
+    593          
+    594              status = AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMASTATUS;
+    595              TRACE_DEBUG_WP("Dma Ept%d ", bEndpoint);
+    596          
+    597              // Disable DMA interrupt to avoid receiving 2 interrupts (B_EN and TR_EN)
+    598              AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL &=
+    599                  ~(AT91C_UDPHS_END_TR_EN | AT91C_UDPHS_END_B_EN);
+    600          
+    601              AT91C_BASE_UDPHS->UDPHS_IEN &= ~(1 << SHIFT_DMA << bEndpoint);
+    602          
+    603              if( AT91C_UDPHS_END_BF_ST == (status & AT91C_UDPHS_END_BF_ST) ) {
+    604          
+    605                  TRACE_DEBUG_WP("EndBuffer ");
+    606          
+    607                  // BUFF_COUNT holds the number of untransmitted bytes.
+    608                  // BUFF_COUNT is equal to zero in case of good transfer
+    609                  justTransferred = pTransfer->buffered
+    610                                           - ((status & AT91C_UDPHS_BUFF_COUNT) >> 16);
+    611                  pTransfer->transferred += justTransferred;
+    612          
+    613                  pTransfer->buffered = ((status & AT91C_UDPHS_BUFF_COUNT) >> 16);
+    614          
+    615                  pTransfer->remaining -= justTransferred;
+    616          
+    617                  TRACE_DEBUG_WP("\n\r1pTransfer->buffered %d \n\r", pTransfer->buffered);
+    618                  TRACE_DEBUG_WP("1pTransfer->transferred %d \n\r", pTransfer->transferred);
+    619                  TRACE_DEBUG_WP("1pTransfer->remaining %d \n\r", pTransfer->remaining);
+    620          
+    621                  if( (pTransfer->remaining + pTransfer->buffered) > 0 ) {
+    622          
+    623                      // Prepare an other transfer
+    624                      if( pTransfer->remaining > DMA_MAX_FIFO_SIZE ) {
+    625          
+    626                          pTransfer->buffered = DMA_MAX_FIFO_SIZE;    
+    627                      }
+    628                      else {
+    629                          pTransfer->buffered = pTransfer->remaining;
+    630                      }
+    631          
+    632                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMAADDRESS = 
+    633                          (unsigned int)((pTransfer->pData) + (pTransfer->transferred));
+    634          
+    635                      // Clear unwanted interrupts
+    636                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMASTATUS;
+    637          
+    638                      // Enable DMA endpoint interrupt
+    639                      AT91C_BASE_UDPHS->UDPHS_IEN |= (1 << SHIFT_DMA << bEndpoint);
+    640                      // DMA config for receive the good size of buffer, or an error buffer
+    641          
+    642                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL = 0; // raz
+    643                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL =
+    644                                               ( ((pTransfer->buffered << 16) & AT91C_UDPHS_BUFF_COUNT)
+    645                                                 | AT91C_UDPHS_END_TR_EN
+    646                                                 | AT91C_UDPHS_END_TR_IT
+    647                                                 | AT91C_UDPHS_END_B_EN
+    648                                                 | AT91C_UDPHS_END_BUFFIT
+    649                                                 | AT91C_UDPHS_CHANN_ENB );
+    650                  }
+    651              }
+    652              else if( AT91C_UDPHS_END_TR_ST == (status & AT91C_UDPHS_END_TR_ST) ) {
+    653          
+    654                  TRACE_DEBUG_WP("EndTransf ");
+    655          
+    656                  pTransfer->transferred = pTransfer->buffered
+    657                                           - ((status & AT91C_UDPHS_BUFF_COUNT) >> 16);
+    658                  pTransfer->remaining = 0;
+    659                  TRACE_DEBUG_WP("\n\r0pTransfer->buffered %d \n\r", pTransfer->buffered);
+    660                  TRACE_DEBUG_WP("0pTransfer->transferred %d \n\r", pTransfer->transferred);
+    661                  TRACE_DEBUG_WP("0pTransfer->remaining %d \n\r", pTransfer->remaining);
+    662              }
+    663              else {
+    664          
+    665                  TRACE_ERROR("UDPHS_DmaHandler: Error (0x%08X)\n\r", status);
+    666                  result = USBD_STATUS_ABORTED;
+    667              }
+    668          
+    669              // Invoke callback
+    670              if( pTransfer->remaining == 0 ) {
+    671          
+    672                  TRACE_DEBUG_WP("EOT ");
+    673                  UDPHS_EndOfTransfer(bEndpoint, result);
+    674              }
+    675          }
+    676          #endif
+    677          
+    678          
+    679          //------------------------------------------------------------------------------
+    680          //      Exported functions
+    681          //------------------------------------------------------------------------------
+    682          
+    683          //------------------------------------------------------------------------------
+    684          /// USB interrupt handler
+    685          /// Manages device resume, suspend, end of bus reset. 
+    686          /// Forwards endpoint interrupts to the appropriate handler.
+    687          //------------------------------------------------------------------------------
+    688          void UDPD_IrqHandler(void)
+    689          {
+    690              unsigned int  status;
+    691              unsigned char numIT;
+    692          
+    693              if (deviceState >= USBD_STATE_POWERED) {
+    694          
+    695                  LED_Set(USBD_LEDUSB);
+    696              }
+    697          
+    698              // Get interrupts status
+    699              status = AT91C_BASE_UDPHS->UDPHS_INTSTA & AT91C_BASE_UDPHS->UDPHS_IEN;
+    700          
+    701              // Handle all UDPHS interrupts
+    702              TRACE_DEBUG_WP("H");
+    703              while (status != 0) {
+    704          
+    705                  // Start Of Frame (SOF)
+    706                  if ((status & AT91C_UDPHS_IEN_SOF) != 0) {
+    707          
+    708                      TRACE_DEBUG_WP("SOF ");
+    709          
+    710                      // Invoke the SOF callback
+    711                      //USB_StartOfFrameCallback(pUsb);
+    712          
+    713                      // Acknowledge interrupt
+    714                      AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_IEN_SOF;
+    715                      status &= ~AT91C_UDPHS_IEN_SOF;
+    716                  }
+    717                  // Suspend
+    718                  // This interrupt is always treated last (hence the '==')
+    719                  else if (status == AT91C_UDPHS_DET_SUSPD) {
+    720          
+    721                      TRACE_DEBUG_WP("S");
+    722          
+    723                      // The device enters the Suspended state
+    724                      // MCK + UDPCK must be off
+    725                      // Pull-Up must be connected
+    726                      // Transceiver must be disabled
+    727          
+    728                      LED_Clear(USBD_LEDUSB);
+    729          
+    730                      UDPHS_DisableBIAS();
+    731          
+    732                      // Enable wakeup
+    733                      AT91C_BASE_UDPHS->UDPHS_IEN |= AT91C_UDPHS_WAKE_UP | AT91C_UDPHS_ENDOFRSM;
+    734                      AT91C_BASE_UDPHS->UDPHS_IEN &= ~AT91C_UDPHS_DET_SUSPD;
+    735          
+    736                      // Acknowledge interrupt
+    737                      AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_DET_SUSPD | AT91C_UDPHS_WAKE_UP;
+    738                      previousDeviceState = deviceState;
+    739                      deviceState = USBD_STATE_SUSPENDED;
+    740                      UDPHS_DisableUsbClock();
+    741          
+    742                      // Invoke the Suspend callback
+    743                      USBDCallbacks_Suspended();
+    744                  }
+    745                  // Resume
+    746                  else if( ((status & AT91C_UDPHS_WAKE_UP) != 0)      // line activity
+    747                        || ((status & AT91C_UDPHS_ENDOFRSM) != 0))  { // pc wakeup
+    748                      {
+    749                          // Invoke the Resume callback
+    750                          USBDCallbacks_Resumed();
+    751          
+    752                          TRACE_DEBUG_WP("R");
+    753          
+    754                          UDPHS_EnableUsbClock();
+    755                          UDPHS_EnableBIAS();
+    756          
+    757                          // The device enters Configured state
+    758                          // MCK + UDPCK must be on
+    759                          // Pull-Up must be connected
+    760                          // Transceiver must be enabled
+    761          
+    762                          deviceState = previousDeviceState;
+    763          
+    764                          AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_WAKE_UP | AT91C_UDPHS_ENDOFRSM | AT91C_UDPHS_DET_SUSPD;
+    765          
+    766                          AT91C_BASE_UDPHS->UDPHS_IEN |= AT91C_UDPHS_ENDOFRSM | AT91C_UDPHS_DET_SUSPD;
+    767                          AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_WAKE_UP | AT91C_UDPHS_ENDOFRSM;
+    768                          AT91C_BASE_UDPHS->UDPHS_IEN &= ~AT91C_UDPHS_WAKE_UP;
+    769                      }
+    770                  }
+    771                  // End of bus reset
+    772                  else if ((status & AT91C_UDPHS_ENDRESET) == AT91C_UDPHS_ENDRESET) {
+    773          
+    774          //            TRACE_DEBUG_WP("EoB ");
+    775          
+    776                      // The device enters the Default state
+    777                      deviceState = USBD_STATE_DEFAULT;
+    778                      //      MCK + UDPCK are already enabled
+    779                      //      Pull-Up is already connected
+    780                      //      Transceiver must be enabled
+    781                      //      Endpoint 0 must be enabled
+    782          
+    783                      UDPHS_ResetEndpoints();
+    784                      UDPHS_DisableEndpoints();
+    785                      USBD_ConfigureEndpoint(0);
+    786          
+    787                      // Flush and enable the Suspend interrupt
+    788                      AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_WAKE_UP | AT91C_UDPHS_DET_SUSPD;
+    789          
+    790                      //// Enable the Start Of Frame (SOF) interrupt if needed
+    791                      //if (pCallbacks->startOfFrame != 0)
+    792                      //{
+    793                      //    AT91C_BASE_UDPHS->UDPHS_IEN |= AT91C_UDPHS_IEN_SOF;
+    794                      //}
+    795          
+    796                      // Invoke the Reset callback
+    797                      USBDCallbacks_Reset();
+    798          
+    799                      // Acknowledge end of bus reset interrupt
+    800                      AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_ENDRESET;
+    801          
+    802                      AT91C_BASE_UDPHS->UDPHS_IEN |= AT91C_UDPHS_DET_SUSPD;
+    803                  }
+    804                  // Handle upstream resume interrupt
+    805                  else if (status & AT91C_UDPHS_UPSTR_RES) {
+    806          
+    807                      TRACE_DEBUG_WP("ExtRes ");
+    808          
+    809                      // - Acknowledge the IT
+    810                      AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_UPSTR_RES;
+    811                  }
+    812                  // Endpoint interrupts
+    813                  else {
+    814          #ifndef DMA
+    815                      // Handle endpoint interrupts
+    816                      for (numIT = 0; numIT < NUM_IT_MAX; numIT++) {
+    817          
+    818                          if ((status & (1 << SHIFT_INTERUPT << numIT)) != 0) {
+    819          
+    820                              UDPHS_EndpointHandler(numIT);
+    821                          }
+    822                      }
+    823          #else
+    824                      // Handle endpoint control interrupt
+    825                      if ((status & (1 << SHIFT_INTERUPT << 0)) != 0) {
+    826          
+    827                          UDPHS_EndpointHandler( 0 );
+    828                      }
+    829                      else {
+    830          
+    831                          numIT = 1;
+    832                          while((status&(0x7E<<SHIFT_DMA)) != 0) {
+    833          
+    834                              // Check if endpoint has a pending interrupt
+    835                              if ((status & (1 << SHIFT_DMA << numIT)) != 0) {
+    836          
+    837                                  UDPHS_DmaHandler(numIT);
+    838                                  status &= ~(1 << SHIFT_DMA << numIT);
+    839                                  if (status != 0) {
+    840          
+    841                                      TRACE_INFO_WP("\n\r  - ");
+    842                                  }
+    843                              }
+    844                              numIT++;
+    845                          }
+    846                      }
+    847          #endif
+    848                  }
+    849          
+    850                  // Retrieve new interrupt status
+    851                  status = AT91C_BASE_UDPHS->UDPHS_INTSTA & AT91C_BASE_UDPHS->UDPHS_IEN;
+    852          
+    853                  TRACE_DEBUG_WP("\n\r");
+    854                  if (status != 0) {
+    855          
+    856                      TRACE_DEBUG_WP("  - ");
+    857                  }
+    858              }
+    859          
+    860              if (deviceState >= USBD_STATE_POWERED) {
+    861          
+    862                  LED_Clear(USBD_LEDUSB);
+    863              }
+    864          }
+    865          
+    866          //------------------------------------------------------------------------------
+    867          /// Configure an endpoint with the provided endpoint descriptor
+    868          /// \param pDdescriptor Pointer to the endpoint descriptor
+    869          //------------------------------------------------------------------------------
+    870          void USBD_ConfigureEndpoint(const USBEndpointDescriptor *pDescriptor)
+    871          {
+    872              Endpoint *pEndpoint;
+    873              unsigned char bEndpoint;
+    874              unsigned char bType;
+    875              unsigned char bEndpointDir;
+    876              unsigned char bInterval = 0;
+    877              unsigned char bSizeEpt = 0;
+    878          
+    879              // NULL descriptor -> Control endpoint 0
+    880              if (pDescriptor == 0) {
+    881          
+    882                  bEndpoint = 0;
+    883                  pEndpoint = &(endpoints[bEndpoint]);
+    884                  bType = USBEndpointDescriptor_CONTROL;
+    885                  bEndpointDir = 0;
+    886                  pEndpoint->size = BOARD_USB_ENDPOINTS_MAXPACKETSIZE(0);
+    887                  pEndpoint->bank = BOARD_USB_ENDPOINTS_BANKS(0);
+    888              }
+    889              else  {
+    890          
+    891                  // The endpoint number
+    892                  bEndpoint = USBEndpointDescriptor_GetNumber(pDescriptor);
+    893                  pEndpoint = &(endpoints[bEndpoint]);
+    894                  // Transfer type: Control, Isochronous, Bulk, Interrupt
+    895                  bType = USBEndpointDescriptor_GetType(pDescriptor);
+    896                  // Direction, ignored for control endpoints
+    897                  bEndpointDir = USBEndpointDescriptor_GetDirection(pDescriptor);
+    898                  // Interval, for ISO endpoints ONLY
+    899                  bInterval = USBEndpointDescriptor_GetInterval(pDescriptor);
+    900                  if (bInterval > 16) bInterval = 16;
+    901                  pEndpoint->size = USBEndpointDescriptor_GetMaxPacketSize(pDescriptor);
+    902                  pEndpoint->bank = BOARD_USB_ENDPOINTS_BANKS(bEndpoint);
+    903              }
+    904          
+    905              // Abort the current transfer is the endpoint was configured and in
+    906              // Write or Read state
+    907              if( (pEndpoint->state == UDP_ENDPOINT_RECEIVING)
+    908               || (pEndpoint->state == UDP_ENDPOINT_SENDING) ) {
+    909          
+    910                  UDPHS_EndOfTransfer(bEndpoint, USBD_STATUS_RESET);
+    911              }
+    912              pEndpoint->state = UDP_ENDPOINT_IDLE;
+    913          
+    914              // Disable endpoint
+    915              AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLDIS = AT91C_UDPHS_SHRT_PCKT
+    916                                                                     | AT91C_UDPHS_BUSY_BANK
+    917                                                                     | AT91C_UDPHS_NAK_OUT
+    918                                                                     | AT91C_UDPHS_NAK_IN
+    919                                                                     | AT91C_UDPHS_STALL_SNT
+    920                                                                     | AT91C_UDPHS_RX_SETUP
+    921                                                                     | AT91C_UDPHS_TX_PK_RDY
+    922                                                                     | AT91C_UDPHS_TX_COMPLT
+    923                                                                     | AT91C_UDPHS_RX_BK_RDY
+    924                                                                     | AT91C_UDPHS_ERR_OVFLW
+    925                                                                     | AT91C_UDPHS_MDATA_RX
+    926                                                                     | AT91C_UDPHS_DATAX_RX
+    927                                                                     | AT91C_UDPHS_NYET_DIS
+    928                                                                     | AT91C_UDPHS_INTDIS_DMA
+    929                                                                     | AT91C_UDPHS_AUTO_VALID
+    930                                                                     | AT91C_UDPHS_EPT_DISABL;
+    931          
+    932              // Reset Endpoint Fifos
+    933              AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCLRSTA = AT91C_UDPHS_TOGGLESQ | AT91C_UDPHS_FRCESTALL;
+    934              AT91C_BASE_UDPHS->UDPHS_EPTRST = 1<<bEndpoint;
+    935          
+    936              // Configure endpoint
+    937              if( pEndpoint->size <= 8 )  {
+    938                  bSizeEpt = 0;
+    939              } 
+    940              else if ( pEndpoint->size <= 16 ) {
+    941                  bSizeEpt = 1;
+    942              }
+    943              else if ( pEndpoint->size <= 32 ) {
+    944                  bSizeEpt = 2;
+    945              }
+    946              else if ( pEndpoint->size <= 64 ) {
+    947                  bSizeEpt = 3;
+    948              }
+    949              else if ( pEndpoint->size <= 128 ) {
+    950                  bSizeEpt = 4;
+    951              }
+    952              else if ( pEndpoint->size <= 256 ) {
+    953                  bSizeEpt = 5;
+    954              }
+    955              else if ( pEndpoint->size <= 512 )  {
+    956                  bSizeEpt = 6;
+    957              }
+    958              else if ( pEndpoint->size <= 1024 ) {
+    959                  bSizeEpt = 7;
+    960              } //else {
+    961              //  sizeEpt = 0; // control endpoint
+    962              //}
+    963          
+    964              // Configure endpoint
+    965              if (bType == USBEndpointDescriptor_CONTROL) {
+    966          
+    967                  // Enable endpoint IT for control endpoint
+    968                  AT91C_BASE_UDPHS->UDPHS_IEN |= (1<<SHIFT_INTERUPT<<bEndpoint);
+    969              }
+    970          
+    971          
+    972              AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG = bSizeEpt 
+    973                                                                  | (bEndpointDir << 3) 
+    974                                                                  | (bType << 4) 
+    975                                                                  | ((pEndpoint->bank) << 6)
+    976                                                                  | (bInterval << 8)
+    977                                                                  ;
+    978          
+    979              while( (signed int)AT91C_UDPHS_EPT_MAPD != (signed int)((AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG) & AT91C_UDPHS_EPT_MAPD) ) {
+    980          
+    981                  // resolved by clearing the reset IT in good place
+    982                  TRACE_ERROR("PB bEndpoint: 0x%X\n\r", bEndpoint);
+    983                  TRACE_ERROR("PB bSizeEpt: 0x%X\n\r", bSizeEpt);
+    984                  TRACE_ERROR("PB bEndpointDir: 0x%X\n\r", bEndpointDir);
+    985                  TRACE_ERROR("PB bType: 0x%X\n\r", bType);
+    986                  TRACE_ERROR("PB pEndpoint->bank: 0x%X\n\r", pEndpoint->bank);
+    987                  TRACE_ERROR("PB UDPHS_EPTCFG: 0x%X\n\r", AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG);
+    988                  for(;;);
+    989              }
+    990          
+    991              if (bType == USBEndpointDescriptor_CONTROL) {
+    992          
+    993                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLENB = AT91C_UDPHS_RX_BK_RDY 
+    994                                                                         | AT91C_UDPHS_RX_SETUP
+    995                                                                         | AT91C_UDPHS_EPT_ENABL;
+    996              }
+    997              else {
+    998          #ifndef DMA
+    999                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLENB = AT91C_UDPHS_EPT_ENABL;
+   1000          #else
+   1001                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLENB = AT91C_UDPHS_AUTO_VALID 
+   1002                                                                         | AT91C_UDPHS_EPT_ENABL;
+   1003          #endif
+   1004              }
+   1005          
+   1006          }
+   1007          
+   1008          //------------------------------------------------------------------------------
+   1009          /// Sends data through an USB endpoint (IN)
+   1010          /// Sets up the transfer descriptor, write one or two data payloads
+   1011          /// (depending on the number of FIFO banks for the endpoint) and then
+   1012          /// starts the actual transfer. The operation is complete when all
+   1013          /// the data has been sent.
+   1014          /// \param bEndpoint Index of endpoint
+   1015          /// \param *pData  Data to be written
+   1016          /// \param dLength Data length to be send
+   1017          /// \param fCallback  Callback to be call after the success command
+   1018          /// \param *pArgument Callback argument
+   1019          /// \return USBD_STATUS_LOCKED or USBD_STATUS_SUCCESS
+   1020          //------------------------------------------------------------------------------
+   1021          char USBD_Write( unsigned char    bEndpoint,
+   1022                           const void       *pData,
+   1023                           unsigned int     dLength,
+   1024                           TransferCallback fCallback,
+   1025                           void             *pArgument )
+   1026          {
+   1027              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+   1028              Transfer *pTransfer = &(pEndpoint->transfer);
+   1029          
+   1030              // Return if the endpoint is not in IDLE state
+   1031              if (pEndpoint->state != UDP_ENDPOINT_IDLE)  {
+   1032          
+   1033                  return USBD_STATUS_LOCKED;
+   1034              }
+   1035          
+   1036              TRACE_DEBUG_WP("Write%d(%d) ", bEndpoint, dLength);
+   1037              pEndpoint->sendZLP = 0;
+   1038              // Setup the transfer descriptor
+   1039              pTransfer->pData = (void *) pData;
+   1040              pTransfer->remaining = dLength;
+   1041              pTransfer->buffered = 0;
+   1042              pTransfer->transferred = 0;
+   1043              pTransfer->fCallback = fCallback;
+   1044              pTransfer->pArgument = pArgument;
+   1045          
+   1046              // Send one packet
+   1047              pEndpoint->state = UDP_ENDPOINT_SENDING;
+   1048          
+   1049          #ifdef DMA
+   1050              // Test if endpoint type control
+   1051              if(AT91C_UDPHS_EPT_TYPE_CTL_EPT == (AT91C_UDPHS_EPT_TYPE&(AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG)))  {
+   1052          #endif
+   1053                  // Enable endpoint IT
+   1054                  AT91C_BASE_UDPHS->UDPHS_IEN |= (1 << SHIFT_INTERUPT << bEndpoint);
+   1055                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLENB = AT91C_UDPHS_TX_PK_RDY;
+   1056          
+   1057          #ifdef DMA
+   1058              }
+   1059              else {
+   1060          
+   1061                  if( pTransfer->remaining == 0 ) {
+   1062                      // DMA not handle ZLP
+   1063                      AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTSETSTA = AT91C_UDPHS_TX_PK_RDY;
+   1064                      // Enable endpoint IT
+   1065                      AT91C_BASE_UDPHS->UDPHS_IEN |= (1 << SHIFT_INTERUPT << bEndpoint);
+   1066                      AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLENB = AT91C_UDPHS_TX_PK_RDY;
+   1067                  }
+   1068                  else {
+   1069                      // Others endpoints (not control)
+   1070                      if( pTransfer->remaining > DMA_MAX_FIFO_SIZE ) {
+   1071          
+   1072                          // Transfer the max
+   1073                          pTransfer->buffered = DMA_MAX_FIFO_SIZE;    
+   1074                      }
+   1075                      else {
+   1076                          // Transfer the good size
+   1077                          pTransfer->buffered = pTransfer->remaining;
+   1078                      }
+   1079          
+   1080                      TRACE_DEBUG_WP("\n\r_WR:%d ", pTransfer->remaining );
+   1081                      TRACE_DEBUG_WP("B:%d ", pTransfer->buffered );
+   1082                      TRACE_DEBUG_WP("T:%d ", pTransfer->transferred );
+   1083          
+   1084                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMAADDRESS = (unsigned int)(pTransfer->pData);
+   1085          
+   1086                      // Clear unwanted interrupts
+   1087                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMASTATUS;
+   1088                      // Enable DMA endpoint interrupt
+   1089                      AT91C_BASE_UDPHS->UDPHS_IEN |= (1 << SHIFT_DMA << bEndpoint);
+   1090                      // DMA config
+   1091                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL = 0; // raz
+   1092                      AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL =
+   1093                                                        ( ((pTransfer->buffered << 16) & AT91C_UDPHS_BUFF_COUNT)
+   1094                                                          | AT91C_UDPHS_END_B_EN
+   1095                                                          | AT91C_UDPHS_END_BUFFIT
+   1096                                                          | AT91C_UDPHS_CHANN_ENB );
+   1097                  }
+   1098              }
+   1099          #endif
+   1100          
+   1101              return USBD_STATUS_SUCCESS;
+   1102          }
+   1103          
+   1104          //------------------------------------------------------------------------------
+   1105          /// Reads incoming data on an USB endpoint (OUT)
+   1106          /// \param bEndpoint Index of endpoint
+   1107          /// \param *pData  Data to be readen
+   1108          /// \param dLength Data length to be receive
+   1109          /// \param fCallback  Callback to be call after the success command
+   1110          /// \param *pArgument Callback argument
+   1111          /// \return USBD_STATUS_LOCKED or USBD_STATUS_SUCCESS
+   1112          //------------------------------------------------------------------------------
+   1113          char USBD_Read( unsigned char    bEndpoint,
+   1114                          void             *pData,
+   1115                          unsigned int     dLength,
+   1116                          TransferCallback fCallback,
+   1117                          void             *pArgument )
+   1118          {
+   1119              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+   1120              Transfer *pTransfer = &(pEndpoint->transfer);
+   1121            
+   1122              // Return if the endpoint is not in IDLE state
+   1123              if (pEndpoint->state != UDP_ENDPOINT_IDLE) {
+   1124          
+   1125                  return USBD_STATUS_LOCKED;
+   1126              }
+   1127          
+   1128              TRACE_DEBUG_WP("Read%d(%d) ", bEndpoint, dLength);
+   1129          
+   1130              // Endpoint enters Receiving state
+   1131              pEndpoint->state = UDP_ENDPOINT_RECEIVING;
+   1132          
+   1133              // Set the transfer descriptor
+   1134              pTransfer->pData = pData;
+   1135              pTransfer->remaining = dLength;
+   1136              pTransfer->buffered = 0;
+   1137              pTransfer->transferred = 0;
+   1138              pTransfer->fCallback = fCallback;
+   1139              pTransfer->pArgument = pArgument;
+   1140          
+   1141          #ifdef DMA
+   1142              // Test if endpoint type control
+   1143              if(AT91C_UDPHS_EPT_TYPE_CTL_EPT == (AT91C_UDPHS_EPT_TYPE&(AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG))) {
+   1144          #endif
+   1145                  // Control endpoint
+   1146                  // Enable endpoint IT
+   1147                  AT91C_BASE_UDPHS->UDPHS_IEN |= (1 << SHIFT_INTERUPT << bEndpoint);
+   1148                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCTLENB = AT91C_UDPHS_RX_BK_RDY;
+   1149          #ifdef DMA
+   1150              }
+   1151              else {
+   1152          
+   1153                  TRACE_DEBUG_WP("Read%d(%d) ", bEndpoint, dLength);
+   1154          
+   1155                  // Others endpoints (not control)
+   1156                  if( pTransfer->remaining > DMA_MAX_FIFO_SIZE ) {
+   1157          
+   1158                      // Transfer the max
+   1159                      pTransfer->buffered = DMA_MAX_FIFO_SIZE;    
+   1160                  }
+   1161                  else {
+   1162                      // Transfer the good size
+   1163                      pTransfer->buffered = pTransfer->remaining;
+   1164                  }
+   1165          
+   1166                  AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMAADDRESS = (unsigned int)(pTransfer->pData);
+   1167          
+   1168                  // Clear unwanted interrupts
+   1169                  AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMASTATUS;
+   1170          
+   1171                  // Enable DMA endpoint interrupt
+   1172                  AT91C_BASE_UDPHS->UDPHS_IEN |= (1 << SHIFT_DMA << bEndpoint);
+   1173          
+   1174                  TRACE_DEBUG_WP("\n\r_RR:%d ", pTransfer->remaining );
+   1175                  TRACE_DEBUG_WP("B:%d ", pTransfer->buffered );
+   1176                  TRACE_DEBUG_WP("T:%d ", pTransfer->transferred );
+   1177          
+   1178                  // DMA config
+   1179                  AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL = 0; // raz
+   1180                  AT91C_BASE_UDPHS->UDPHS_DMA[bEndpoint].UDPHS_DMACONTROL =
+   1181                                           ( ((pTransfer->buffered << 16) & AT91C_UDPHS_BUFF_COUNT)
+   1182                                             | AT91C_UDPHS_END_TR_EN
+   1183                                             | AT91C_UDPHS_END_TR_IT
+   1184                                             | AT91C_UDPHS_END_B_EN
+   1185                                             | AT91C_UDPHS_END_BUFFIT
+   1186                                             | AT91C_UDPHS_CHANN_ENB );
+   1187              }
+   1188          #endif
+   1189          
+   1190              return USBD_STATUS_SUCCESS;
+   1191          }
+   1192          
+   1193          //------------------------------------------------------------------------------
+   1194          /// Put endpoint into Halt state
+   1195          /// \param bEndpoint Index of endpoint
+   1196          //------------------------------------------------------------------------------
+   1197          void USBD_Halt( unsigned char bEndpoint )
+   1198          {
+   1199              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+   1200          
+   1201              TRACE_INFO("usbd_Halt%d ", bEndpoint);
+   1202              // Check that endpoint is enabled and not already in Halt state
+   1203              if( (pEndpoint->state != UDP_ENDPOINT_DISABLED)
+   1204               && (pEndpoint->state != UDP_ENDPOINT_HALTED) ) {
+   1205          
+   1206                  TRACE_INFO("Halt%d ", bEndpoint);
+   1207          
+   1208                  // Abort the current transfer if necessary
+   1209                  UDPHS_EndOfTransfer(bEndpoint, USBD_STATUS_ABORTED);
+   1210          
+   1211                  // Put endpoint into Halt state
+   1212                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTSETSTA = AT91C_UDPHS_FRCESTALL;
+   1213                  pEndpoint->state = UDP_ENDPOINT_HALTED;
+   1214          
+   1215          #ifdef DMA
+   1216                  // Test if endpoint type control
+   1217                  if(AT91C_UDPHS_EPT_TYPE_CTL_EPT == (AT91C_UDPHS_EPT_TYPE&(AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCFG)))  {
+   1218          #endif
+   1219                      // Enable the endpoint interrupt
+   1220                      AT91C_BASE_UDPHS->UDPHS_IEN |= (1<<SHIFT_INTERUPT<<bEndpoint);
+   1221          #ifdef DMA
+   1222                  }
+   1223                  else {
+   1224                      // Enable IT DMA
+   1225                      AT91C_BASE_UDPHS->UDPHS_IEN |= (1<<SHIFT_DMA<<bEndpoint);
+   1226                  }
+   1227          #endif
+   1228             }
+   1229          }
+   1230          
+   1231          //------------------------------------------------------------------------------
+   1232          /// Clears the Halt feature on the given endpoint.
+   1233          /// \param bEndpoint Index of endpoint
+   1234          //------------------------------------------------------------------------------
+   1235          void USBD_Unhalt( unsigned char bEndpoint )
+   1236          {
+   1237              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+   1238          
+   1239              // Check if the endpoint is enabled
+   1240              if (pEndpoint->state != UDP_ENDPOINT_DISABLED) {
+   1241          
+   1242                  TRACE_DEBUG_WP("Unhalt%d ", bEndpoint);
+   1243          
+   1244                  // Return endpoint to Idle state
+   1245                  pEndpoint->state = UDP_ENDPOINT_IDLE;
+   1246          
+   1247                  // Clear FORCESTALL flag
+   1248                  AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTCLRSTA = AT91C_UDPHS_TOGGLESQ | AT91C_UDPHS_FRCESTALL;
+   1249          
+   1250                  // Reset Endpoint Fifos
+   1251                  AT91C_BASE_UDPHS->UDPHS_EPTRST = (1<<bEndpoint);
+   1252              }
+   1253          }
+   1254          
+   1255          //------------------------------------------------------------------------------
+   1256          /// Returns the current Halt status of an endpoint.
+   1257          /// \param bEndpoint Index of endpoint
+   1258          /// \return 1 if the endpoint is currently halted; otherwise 0
+   1259          //------------------------------------------------------------------------------
+   1260          unsigned char USBD_IsHalted( unsigned char bEndpoint )
+   1261          {
+   1262              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+   1263              unsigned char status = 0;
+   1264          
+   1265              if (pEndpoint->state == UDP_ENDPOINT_HALTED) {
+   1266                  status = 1;
+   1267              }
+   1268              return( status );
+   1269          }
+   1270          
+   1271          //------------------------------------------------------------------------------
+   1272          /// IS High Speed device working in High Speed ?
+   1273          /// \return 1 if the device is in High Speed; otherwise 0 (Full Speed)
+   1274          //------------------------------------------------------------------------------
+   1275          unsigned char USBD_IsHighSpeed( void )
+   1276          {
+   1277              unsigned char status = 0;
+   1278          
+   1279              if( AT91C_UDPHS_SPEED == (AT91C_BASE_UDPHS->UDPHS_INTSTA & AT91C_UDPHS_SPEED) )
+   1280              {
+   1281                  // High Speed
+   1282                  TRACE_DEBUG_WP("High Speed\n\r");
+   1283                  status = 1;
+   1284              }
+   1285              else {
+   1286                  TRACE_DEBUG_WP("Full Speed\n\r");
+   1287              }
+   1288              return( status );
+   1289          }
+   1290           
+   1291          
+   1292          //------------------------------------------------------------------------------
+   1293          /// Causes the endpoint to acknowledge the next received packet with a STALL
+   1294          /// handshake.
+   1295          /// Further packets are then handled normally.
+   1296          /// \param bEndpoint Index of endpoint
+   1297          /// \return Operation result code: USBD_STATUS_LOCKED or USBD_STATUS_SUCCESS
+   1298          //------------------------------------------------------------------------------
+   1299          unsigned char USBD_Stall( unsigned char bEndpoint )
+   1300          {
+   1301              Endpoint *pEndpoint = &(endpoints[bEndpoint]);
+   1302          
+   1303              // Check that endpoint is in Idle state
+   1304              if (pEndpoint->state != UDP_ENDPOINT_IDLE) {
+   1305          
+   1306                  TRACE_WARNING("UDP_Stall: Endpoint%d locked\n\r", bEndpoint);
+   1307                  return USBD_STATUS_LOCKED;
+   1308              }
+   1309          
+   1310              TRACE_DEBUG_WP("Stall%d ", bEndpoint);
+   1311          
+   1312              AT91C_BASE_UDPHS->UDPHS_EPT[bEndpoint].UDPHS_EPTSETSTA = AT91C_UDPHS_FRCESTALL;
+   1313          
+   1314              return USBD_STATUS_SUCCESS;
+   1315          }
+   1316          
+   1317          //------------------------------------------------------------------------------
+   1318          /// Activates a remote wakeup procedure
+   1319          //------------------------------------------------------------------------------
+   1320          void USBD_RemoteWakeUp(void)
+   1321          {
+   1322              TRACE_DEBUG_WP("Remote WakeUp\n\r");
+   1323          
+   1324              // Device is currently suspended
+   1325              if (deviceState == USBD_STATE_SUSPENDED) {
+   1326          
+   1327                  TRACE_DEBUG_WP("RW\n\r");
+   1328                  UDPHS_EnableUsbClock();
+   1329          
+   1330                  // Activates a remote wakeup
+   1331                  AT91C_BASE_UDPHS->UDPHS_CTRL |= AT91C_UDPHS_REWAKEUP;
+   1332          
+   1333                  while ((AT91C_BASE_UDPHS->UDPHS_CTRL&AT91C_UDPHS_REWAKEUP) == AT91C_UDPHS_REWAKEUP) {
+   1334          
+   1335                      TRACE_DEBUG_WP("W");
+   1336                  }
+   1337                  UDPHS_EnableBIAS();
+   1338              }
+   1339              // Device is NOT suspended
+   1340              else {
+   1341          
+   1342                  TRACE_WARNING("USBD_RemoteWakeUp: Device is not suspended\n\r");
+   1343              }
+   1344          }
+   1345          
+   1346          //------------------------------------------------------------------------------
+   1347          /// Sets the device address
+   1348          /// \param address Adress to be set
+   1349          //------------------------------------------------------------------------------
+   1350          void USBD_SetAddress( unsigned char address )
+   1351          {
+   1352              TRACE_DEBUG_WP("SetAddr(%d) ", address);
+   1353          
+   1354              // Set address
+   1355              AT91C_BASE_UDPHS->UDPHS_CTRL &= ~AT91C_UDPHS_DEV_ADDR; // RAZ Address
+   1356              AT91C_BASE_UDPHS->UDPHS_CTRL |= address | AT91C_UDPHS_FADDR_EN;
+   1357          
+   1358              // If the address is 0, the device returns to the Default state
+   1359              if (address == 0) {
+   1360                  deviceState = USBD_STATE_DEFAULT;
+   1361              }
+   1362              // If the address is non-zero, the device enters the Address state
+   1363              else {
+   1364                  deviceState = USBD_STATE_ADDRESS;
+   1365              }
+   1366          }
+   1367          
+   1368          //------------------------------------------------------------------------------
+   1369          /// Changes the device state from Address to Configured, or from Configured 
+   1370          /// to Address.
+   1371          /// This method directly access the last received SETUP packet to decide on 
+   1372          /// what to do.
+   1373          /// \param cfgnum configuration number
+   1374          //------------------------------------------------------------------------------
+   1375          void USBD_SetConfiguration( unsigned char cfgnum )
+   1376          {
+   1377              TRACE_DEBUG_WP("SetCfg(%d) ", cfgnum);
+   1378          
+   1379              // Check the request
+   1380              if( cfgnum != 0 ) {
+   1381          
+   1382                  // Enter Configured state
+   1383                  deviceState = USBD_STATE_CONFIGURED;
+   1384              }
+   1385              // If the configuration number is zero, the device goes back to the Address
+   1386              // state
+   1387              else  {
+   1388          
+   1389                  // Go back to Address state
+   1390                  deviceState = USBD_STATE_ADDRESS;
+   1391          
+   1392                  // Abort all transfers
+   1393                  UDPHS_DisableEndpoints();
+   1394              }
+   1395          }
+   1396          
+   1397          //------------------------------------------------------------------------------
+   1398          /// Enables the pull-up on the D+ line to connect the device to the USB.
+   1399          //------------------------------------------------------------------------------
+   1400          void USBD_Connect( void )
+   1401          {
+   1402              TRACE_DEBUG_WP("Conn ");
+   1403          #if defined(BOARD_USB_PULLUP_INTERNAL)
+   1404              AT91C_BASE_UDPHS->UDPHS_CTRL &= ~AT91C_UDPHS_DETACH;   // Pull Up on DP
+   1405              AT91C_BASE_UDPHS->UDPHS_CTRL |= AT91C_UDPHS_PULLD_DIS; // Disable Pull Down
+   1406          
+   1407          #elif defined(BOARD_USB_PULLUP_INTERNAL_BY_MATRIX)
+   1408              TRACE_DEBUG_WP("PUON 1\n\r");
+   1409              AT91C_BASE_MATRIX->MATRIX_USBPCR |= AT91C_MATRIX_USBPCR_PUON;
+   1410          
+   1411          #elif defined(BOARD_USB_PULLUP_EXTERNAL)
+   1412          
+   1413          #ifdef PIN_USB_PULLUP
+   1414              const Pin pinPullUp = PIN_USB_PULLUP;
+   1415              if( pinPullUp.attribute == PIO_OUTPUT_0 ) {
+   1416          
+   1417                  PIO_Set(&pinPullUp);
+   1418              }
+   1419              else {
+   1420          
+   1421                  PIO_Clear(&pinPullUp);
+   1422              }
+   1423          #else
+   1424              #error unsupported now
+   1425          #endif
+   1426          
+   1427          #elif !defined(BOARD_USB_PULLUP_ALWAYSON)
+   1428              #error Unsupported pull-up type.
+   1429          
+   1430          #endif
+   1431          }
+   1432          
+   1433          //------------------------------------------------------------------------------
+   1434          /// Disables the pull-up on the D+ line to disconnect the device from the bus.
+   1435          //------------------------------------------------------------------------------
+   1436          void USBD_Disconnect( void )
+   1437          {
+   1438              TRACE_DEBUG_WP("Disc ");
+   1439          
+   1440          #if defined(BOARD_USB_PULLUP_INTERNAL)
+   1441              AT91C_BASE_UDPHS->UDPHS_CTRL |= AT91C_UDPHS_DETACH; // detach
+   1442              AT91C_BASE_UDPHS->UDPHS_CTRL &= ~AT91C_UDPHS_PULLD_DIS; // Enable Pull Down
+   1443          
+   1444          #elif defined(BOARD_USB_PULLUP_INTERNAL_BY_MATRIX)
+   1445              AT91C_BASE_MATRIX->MATRIX_USBPCR &= ~AT91C_MATRIX_USBPCR_PUON;
+   1446          
+   1447          #elif defined(BOARD_USB_PULLUP_EXTERNAL)
+   1448          
+   1449          #ifdef PIN_USB_PULLUP
+   1450              const Pin pinPullUp = PIN_USB_PULLUP;
+   1451              if (pinPullUp.attribute == PIO_OUTPUT_0) {
+   1452          
+   1453                  PIO_Clear(&pinPullUp);
+   1454              }
+   1455              else {
+   1456          
+   1457                  PIO_Set(&pinPullUp);
+   1458              }
+   1459          #else
+   1460              #error unsupported now
+   1461          #endif
+   1462          
+   1463          #elif !defined(BOARD_USB_PULLUP_ALWAYSON)
+   1464              #error Unsupported pull-up type.
+   1465          
+   1466          #endif
+   1467          
+   1468              // Device returns to the Powered state
+   1469              if (deviceState > USBD_STATE_POWERED) {    
+   1470          
+   1471                  deviceState = USBD_STATE_POWERED;
+   1472              }
+   1473              if (previousDeviceState > USBD_STATE_POWERED) {
+   1474          
+   1475                  previousDeviceState = USBD_STATE_POWERED;
+   1476              }
+   1477          }
+   1478          
+   1479          //------------------------------------------------------------------------------
+   1480          /// Certification test for High Speed device.
+   1481          /// \param bIndex Test to be done
+   1482          //------------------------------------------------------------------------------
+   1483          void USBD_Test( unsigned char bIndex )
+   1484          {
+   1485              char          *pFifo;
+   1486              unsigned char i;
+   1487          
+   1488              AT91C_BASE_UDPHS->UDPHS_IEN &= ~AT91C_UDPHS_DET_SUSPD; // remove suspend for TEST
+   1489              AT91C_BASE_UDPHS->UDPHS_TST |= AT91C_UDPHS_SPEED_CFG_HS; // force High Speed (remove suspend)
+   1490          
+   1491              switch( bIndex ) {
+   1492          
+   1493                  case USBFeatureRequest_TESTPACKET:
+   1494                      TRACE_DEBUG_WP("TEST_PACKET ");
+   1495          
+   1496                      AT91C_BASE_UDPHS->UDPHS_DMA[1].UDPHS_DMACONTROL = 0;
+   1497                      AT91C_BASE_UDPHS->UDPHS_DMA[2].UDPHS_DMACONTROL = 0;
+   1498          
+   1499                      // Configure endpoint 2, 64 bytes, direction IN, type BULK, 1 bank
+   1500                      AT91C_BASE_UDPHS->UDPHS_EPT[2].UDPHS_EPTCFG = AT91C_UDPHS_EPT_SIZE_64 | AT91C_UDPHS_EPT_DIR_IN | AT91C_UDPHS_EPT_TYPE_BUL_EPT | AT91C_UDPHS_BK_NUMBER_1;
+   1501                      while( (signed int)(AT91C_BASE_UDPHS->UDPHS_EPT[2].UDPHS_EPTCFG & AT91C_UDPHS_EPT_MAPD) != (signed int)AT91C_UDPHS_EPT_MAPD ) {}
+   1502          
+   1503                      AT91C_BASE_UDPHS->UDPHS_EPT[2].UDPHS_EPTCTLENB =  AT91C_UDPHS_EPT_ENABL;
+   1504          
+   1505                      // Write FIFO
+   1506                      pFifo = (char*)((unsigned int *)(AT91C_BASE_UDPHS_EPTFIFO->UDPHS_READEPT0) + (EPT_VIRTUAL_SIZE * 2));
+   1507                      for( i=0; i<sizeof(test_packet_buffer); i++) {
+   1508                          pFifo[i] = test_packet_buffer[i];
+   1509                      }
+   1510                      // Tst PACKET
+   1511                      AT91C_BASE_UDPHS->UDPHS_TST |= AT91C_UDPHS_TST_PKT;
+   1512                      // Send packet
+   1513                      AT91C_BASE_UDPHS->UDPHS_EPT[2].UDPHS_EPTSETSTA = AT91C_UDPHS_TX_PK_RDY;
+   1514                      break;
+   1515          
+   1516                  case USBFeatureRequest_TESTJ:
+   1517                      TRACE_DEBUG_WP("TEST_J ");
+   1518                      AT91C_BASE_UDPHS->UDPHS_TST = AT91C_UDPHS_TST_J;
+   1519                      break;
+   1520          
+   1521                  case USBFeatureRequest_TESTK:
+   1522                      TRACE_DEBUG_WP("TEST_K ");
+   1523                      AT91C_BASE_UDPHS->UDPHS_TST = AT91C_UDPHS_TST_K;
+   1524                      break;
+   1525          
+   1526                  case USBFeatureRequest_TESTSE0NAK:
+   1527                      TRACE_DEBUG_WP("TEST_SEO_NAK ");
+   1528                      AT91C_BASE_UDPHS->UDPHS_IEN = 0;  // for test
+   1529                      break;
+   1530          
+   1531                  case USBFeatureRequest_TESTSENDZLP:
+   1532                      //while( 0 != (AT91C_BASE_UDPHS->UDPHS_EPT[0].UDPHS_EPTSTA & AT91C_UDPHS_TX_PK_RDY ) ) {}
+   1533                      AT91C_BASE_UDPHS->UDPHS_EPT[0].UDPHS_EPTSETSTA = AT91C_UDPHS_TX_PK_RDY;
+   1534                      //while( 0 != (AT91C_BASE_UDPHS->UDPHS_EPT[0].UDPHS_EPTSTA & AT91C_UDPHS_TX_PK_RDY ) ) {}
+   1535                      TRACE_DEBUG_WP("SEND_ZLP ");
+   1536                      break;
+   1537              }
+   1538              TRACE_DEBUG_WP("\n\r");
+   1539          }
+   1540          
+   1541          
+   1542          //------------------------------------------------------------------------------
+   1543          /// Initializes the specified USB driver
+   1544          /// This function initializes the current FIFO bank of endpoints,
+   1545          /// configures the pull-up and VBus lines, disconnects the pull-up and
+   1546          /// then trigger the Init callback.
+   1547          //------------------------------------------------------------------------------
+   1548          void USBD_Init(void)
+   1549          {
+   1550              unsigned char i;
+   1551          
+   1552              TRACE_DEBUG_WP("USBD Init()\n\r");
+   1553          
+   1554              // Reset endpoint structures
+   1555              UDPHS_ResetEndpoints();
+   1556          
+   1557              // Enables the USB Clock
+   1558              UDPHS_EnableUsbClock();
+   1559          
+   1560              // Configure the pull-up on D+ and disconnect it
+   1561          #if defined(BOARD_USB_PULLUP_INTERNAL)
+   1562              AT91C_BASE_UDPHS->UDPHS_CTRL |= AT91C_UDPHS_DETACH; // detach
+   1563              AT91C_BASE_UDPHS->UDPHS_CTRL |= AT91C_UDPHS_PULLD_DIS; // Disable Pull Down
+   1564          
+   1565          #elif defined(BOARD_USB_PULLUP_INTERNAL_BY_MATRIX)
+   1566              TRACE_DEBUG_WP("PUON 0\n\r");
+   1567              AT91C_BASE_MATRIX->MATRIX_USBPCR &= ~AT91C_MATRIX_USBPCR_PUON;
+   1568          
+   1569          #elif defined(BOARD_USB_PULLUP_EXTERNAL)
+   1570          #ifdef PIN_USB_PULLUP
+   1571              const Pin pinPullUp = PIN_USB_PULLUP;
+   1572              PIO_Configure(&pinPullUp, 1);
+   1573              if (pinPullUp.attribute == PIO_OUTPUT_0) {
+   1574          
+   1575                  PIO_Clear(&pinPullUp);
+   1576              }
+   1577              else {
+   1578          
+   1579                  PIO_Set(&pinPullUp);
+   1580              }
+   1581          #else
+   1582              #error unsupported now
+   1583          #endif
+   1584          #elif !defined(BOARD_USB_PULLUP_ALWAYSON)
+   1585              #error Unsupported pull-up type.
+   1586          
+   1587          #endif
+   1588          
+   1589              // Reset and enable IP UDPHS
+   1590              AT91C_BASE_UDPHS->UDPHS_CTRL &= ~AT91C_UDPHS_EN_UDPHS;
+   1591              AT91C_BASE_UDPHS->UDPHS_CTRL |= AT91C_UDPHS_EN_UDPHS;
+   1592              // Enable and disable of the transceiver is automaticaly done by the IP.
+   1593          
+   1594              // With OR without DMA !!!
+   1595              // Initialization of DMA
+   1596              for( i=1; i<=((AT91C_BASE_UDPHS->UDPHS_IPFEATURES & AT91C_UDPHS_DMA_CHANNEL_NBR)>>4); i++ ) {
+   1597          
+   1598                  // RESET endpoint canal DMA:
+   1599                  // DMA stop channel command
+   1600                  AT91C_BASE_UDPHS->UDPHS_DMA[i].UDPHS_DMACONTROL = 0;  // STOP command
+   1601          
+   1602                  // Disable endpoint
+   1603                  AT91C_BASE_UDPHS->UDPHS_EPT[i].UDPHS_EPTCTLDIS = AT91C_UDPHS_SHRT_PCKT
+   1604                                                                 | AT91C_UDPHS_BUSY_BANK
+   1605                                                                 | AT91C_UDPHS_NAK_OUT
+   1606                                                                 | AT91C_UDPHS_NAK_IN
+   1607                                                                 | AT91C_UDPHS_STALL_SNT
+   1608                                                                 | AT91C_UDPHS_RX_SETUP
+   1609                                                                 | AT91C_UDPHS_TX_PK_RDY
+   1610                                                                 | AT91C_UDPHS_TX_COMPLT
+   1611                                                                 | AT91C_UDPHS_RX_BK_RDY
+   1612                                                                 | AT91C_UDPHS_ERR_OVFLW
+   1613                                                                 | AT91C_UDPHS_MDATA_RX
+   1614                                                                 | AT91C_UDPHS_DATAX_RX
+   1615                                                                 | AT91C_UDPHS_NYET_DIS
+   1616                                                                 | AT91C_UDPHS_INTDIS_DMA
+   1617                                                                 | AT91C_UDPHS_AUTO_VALID
+   1618                                                                 | AT91C_UDPHS_EPT_DISABL;
+   1619          
+   1620                  // Clear status endpoint
+   1621                  AT91C_BASE_UDPHS->UDPHS_EPT[i].UDPHS_EPTCLRSTA = AT91C_UDPHS_TOGGLESQ
+   1622                                                                 | AT91C_UDPHS_FRCESTALL
+   1623                                                                 | AT91C_UDPHS_RX_BK_RDY
+   1624                                                                 | AT91C_UDPHS_TX_COMPLT
+   1625                                                                 | AT91C_UDPHS_RX_SETUP
+   1626                                                                 | AT91C_UDPHS_STALL_SNT
+   1627                                                                 | AT91C_UDPHS_NAK_IN
+   1628                                                                 | AT91C_UDPHS_NAK_OUT;
+   1629          
+   1630                  // Reset endpoint config
+   1631                  AT91C_BASE_UDPHS->UDPHS_EPT[i].UDPHS_EPTCTLENB = 0;
+   1632          
+   1633                  // Reset DMA channel (Buff count and Control field)
+   1634                  AT91C_BASE_UDPHS->UDPHS_DMA[i].UDPHS_DMACONTROL = AT91C_UDPHS_LDNXT_DSC;  // NON STOP command
+   1635          
+   1636                  // Reset DMA channel 0 (STOP)
+   1637                  AT91C_BASE_UDPHS->UDPHS_DMA[i].UDPHS_DMACONTROL = 0;  // STOP command
+   1638          
+   1639                  // Clear DMA channel status (read the register for clear it)
+   1640                  AT91C_BASE_UDPHS->UDPHS_DMA[i].UDPHS_DMASTATUS = AT91C_BASE_UDPHS->UDPHS_DMA[i].UDPHS_DMASTATUS;
+   1641          
+   1642              }
+   1643          
+   1644              AT91C_BASE_UDPHS->UDPHS_TST = forceUsbFS ? AT91C_UDPHS_SPEED_CFG_FS : 0;
+   1645              AT91C_BASE_UDPHS->UDPHS_IEN = 0;
+   1646              AT91C_BASE_UDPHS->UDPHS_CLRINT = AT91C_UDPHS_UPSTR_RES
+   1647                                             | AT91C_UDPHS_ENDOFRSM
+   1648                                             | AT91C_UDPHS_WAKE_UP
+   1649                                             | AT91C_UDPHS_ENDRESET
+   1650                                             | AT91C_UDPHS_IEN_SOF
+   1651                                             | AT91C_UDPHS_MICRO_SOF
+   1652                                             | AT91C_UDPHS_DET_SUSPD;
+   1653              
+   1654              // Device is in the Attached state
+   1655              deviceState = USBD_STATE_SUSPENDED;
+   1656              previousDeviceState = USBD_STATE_POWERED;
+   1657          
+   1658              // Disable interrupts
+   1659              AT91C_BASE_UDPHS->UDPHS_IEN = AT91C_UDPHS_ENDOFRSM
+   1660                                          | AT91C_UDPHS_WAKE_UP
+   1661                                          | AT91C_UDPHS_DET_SUSPD;
+   1662          
+   1663              // Disable USB clocks
+   1664              UDPHS_DisableUsbClock();
+   1665          
+   1666              // Configure interrupts
+   1667              USBDCallbacks_Initialized();
+   1668          }
+   1669          
+   1670          //------------------------------------------------------------------------------
+   1671          /// Configure USB Speed, should be invoked before USB attachment.
+   1672          /// \param forceFS Force to use FS mode.
+   1673          //------------------------------------------------------------------------------
+   1674          void USBD_ConfigureSpeed(unsigned char forceFS)
+   1675          {
+   1676              if (forceFS) {
+   1677                  AT91C_BASE_UDPHS->UDPHS_TST |=  AT91C_UDPHS_SPEED_CFG_FS;
+   1678              }
+   1679              else {
+   1680                  AT91C_BASE_UDPHS->UDPHS_TST &= ~AT91C_UDPHS_SPEED_CFG_FS;
+   1681              }
+   1682          }
+   1683          
+   1684          
+   1685          //------------------------------------------------------------------------------
+   1686          /// Returns the current state of the USB device.
+   1687          /// \return Device current state.
+   1688          //------------------------------------------------------------------------------
+   1689          unsigned char USBD_GetState( void )
+   1690          {
+   1691              return deviceState;
+   1692          }
+   1693          
+   1694          #endif // BOARD_USB_UDPHS
+   1695          
+
+
+ 
+ 
+ 0 bytes of memory
+
+Errors: none
+Warnings: none

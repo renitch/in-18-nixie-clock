@@ -1,0 +1,784 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:51 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\cdc-ser #
+#                    ial\CDCDSerialDriverDescriptors.c                        #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\cdc-ser #
+#                    ial\CDCDSerialDriverDescriptors.c -D at91sam7s128 -D     #
+#                    flash -D TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock #
+#                    \at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7 #
+#                    s128_flash\List\ --remarks --diag_suppress Pe826,Pe1375  #
+#                    -o C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\at91sam7s128_flash\Obj\ --debug  #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\CDCDSerialD #
+#                    riverDescriptors.lst                                     #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\CDCDSerialDr #
+#                    iverDescriptors.o                                        #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\device\cdc-serial\CDCDSerialDriverDescriptors.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //         Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "CDCDSerialDriverDescriptors.h"
+     35          #include <board.h>
+     36          #include <usb/common/core/USBGenericDescriptor.h>
+     37          #include <usb/common/core/USBConfigurationDescriptor.h>
+     38          #include <usb/common/core/USBEndpointDescriptor.h>
+     39          #include <usb/common/core/USBStringDescriptor.h>
+     40          #include <usb/common/core/USBGenericRequest.h>
+     41          #include <usb/common/cdc/CDCGenericDescriptor.h>
+     42          #include <usb/common/cdc/CDCDeviceDescriptor.h>
+     43          #include <usb/common/cdc/CDCCommunicationInterfaceDescriptor.h>
+     44          #include <usb/common/cdc/CDCDataInterfaceDescriptor.h>
+     45          #include <usb/common/cdc/CDCHeaderDescriptor.h>
+     46          #include <usb/common/cdc/CDCCallManagementDescriptor.h>
+     47          #include <usb/common/cdc/CDCAbstractControlManagementDescriptor.h>
+     48          #include <usb/common/cdc/CDCUnionDescriptor.h>
+     49          
+     50          //------------------------------------------------------------------------------
+     51          //         Definitions
+     52          //------------------------------------------------------------------------------
+     53          
+     54          //------------------------------------------------------------------------------
+     55          /// \page "CDC Serial Device IDs"
+     56          /// This page lists the IDs used in the CDC Serial Device Descriptor.
+     57          ///
+     58          /// !IDs
+     59          /// - CDCDSerialDriverDescriptors_PRODUCTID
+     60          /// - CDCDSerialDriverDescriptors_VENDORID
+     61          /// - CDCDSerialDriverDescriptors_RELEASE
+     62          
+     63          /// Device product ID.
+     64          #define CDCDSerialDriverDescriptors_PRODUCTID       0x6119
+     65          /// Device vendor ID (Atmel).
+     66          #define CDCDSerialDriverDescriptors_VENDORID        0x03EB
+     67          /// Device release number.
+     68          #define CDCDSerialDriverDescriptors_RELEASE         0x0100
+     69          //------------------------------------------------------------------------------
+     70          
+     71          //------------------------------------------------------------------------------
+     72          //         Macros
+     73          //------------------------------------------------------------------------------
+     74          
+     75          /// Returns the minimum between two values.
+     76          #define MIN(a, b)       ((a < b) ? a : b)
+     77          
+     78          //------------------------------------------------------------------------------
+     79          //         Internal structures
+     80          //------------------------------------------------------------------------------
+     81          
+     82          //------------------------------------------------------------------------------
+     83          /// Configuration descriptor list for a device implementing a CDC serial driver.
+     84          //------------------------------------------------------------------------------
+     85          typedef struct {
+     86          
+     87              /// Standard configuration descriptor.
+     88              USBConfigurationDescriptor configuration;
+     89          #if defined(BOARD_USB_OTGHS)
+     90              // OTG descriptor
+     91              USBOtgDescriptor otgDescriptor;
+     92          #endif
+     93              /// Communication interface descriptor.
+     94              USBInterfaceDescriptor  communication;
+     95              /// CDC header functional descriptor.
+     96              CDCHeaderDescriptor header;
+     97              /// CDC call management functional descriptor.
+     98              CDCCallManagementDescriptor callManagement;
+     99              /// CDC abstract control management functional descriptor.
+    100              CDCAbstractControlManagementDescriptor abstractControlManagement;
+    101              /// CDC union functional descriptor (with one slave interface).
+    102              CDCUnionDescriptor union1;
+    103              /// Notification endpoint descriptor.
+    104              USBEndpointDescriptor notification;
+    105              /// Data interface descriptor.
+    106              USBInterfaceDescriptor data;
+    107              /// Data OUT endpoint descriptor.
+    108              USBEndpointDescriptor dataOut;
+    109              /// Data IN endpoint descriptor.
+    110              USBEndpointDescriptor dataIn;
+    111          
+    112          } __attribute__ ((packed)) CDCDSerialDriverConfigurationDescriptors;
+    113          
+    114          //------------------------------------------------------------------------------
+    115          //         Exported variables
+    116          //------------------------------------------------------------------------------
+    117          
+    118          /// Standard USB device descriptor for the CDC serial driver
+
+   \                                 In section .rodata, align 4
+    119          const USBDeviceDescriptor deviceDescriptor = {
+   \                     deviceDescriptor:
+   \   00000000   1201               DC8 18, 1
+   \   00000002   0002               DC16 512
+   \   00000004   02000008           DC8 2, 0, 0, 8
+   \   00000008   EB0319610001       DC16 1003, 24857, 256
+   \   0000000E   000100010000       DC8 0, 1, 0, 1, 0, 0
+    120          
+    121              sizeof(USBDeviceDescriptor),
+    122              USBGenericDescriptor_DEVICE,
+    123              USBDeviceDescriptor_USB2_00,
+    124              CDCDeviceDescriptor_CLASS,
+    125              CDCDeviceDescriptor_SUBCLASS,
+    126              CDCDeviceDescriptor_PROTOCOL,
+    127              BOARD_USB_ENDPOINTS_MAXPACKETSIZE(0),
+    128              CDCDSerialDriverDescriptors_VENDORID,
+    129              CDCDSerialDriverDescriptors_PRODUCTID,
+    130              CDCDSerialDriverDescriptors_RELEASE,
+    131              0, // No string descriptor for manufacturer
+    132              1, // Index of product string descriptor is #1
+    133              0, // No string descriptor for serial number
+    134              1 // Device has 1 possible configuration
+    135          };
+    136          
+    137          #if defined(BOARD_USB_UDPHS) || defined(BOARD_USB_OTGHS)
+    138          
+    139          /// USB device qualifier descriptor.
+    140          const USBDeviceQualifierDescriptor qualifierDescriptor = {
+    141          
+    142              sizeof(USBDeviceQualifierDescriptor),
+    143              USBGenericDescriptor_DEVICEQUALIFIER,
+    144              USBDeviceDescriptor_USB2_00,
+    145              CDCDeviceDescriptor_CLASS,
+    146              CDCDeviceDescriptor_SUBCLASS,
+    147              CDCDeviceDescriptor_PROTOCOL,
+    148              BOARD_USB_ENDPOINTS_MAXPACKETSIZE(0),
+    149              1, // Device has one possible configuration
+    150              0 // Reserved
+    151          };
+    152          
+    153          #endif
+    154          
+    155          /// Standard USB configuration descriptor for the CDC serial driver
+
+   \                                 In section .rodata, align 4
+    156          const CDCDSerialDriverConfigurationDescriptors configurationDescriptorsFS = {
+   \                     configurationDescriptorsFS:
+   \   00000000   0902               DC8 9, 2
+   \   00000002   4300               DC16 67
+   \   00000004   020100C03209       DC8 2, 1, 0, 192, 50, 9, 4, 0, 0, 1, 2, 2, 0, 0, 5, 36, 0
+   \              040000010202
+   \              0000052400  
+   \   00000015   1001               DC16 272
+   \   00000017   052401010004       DC8 5, 36, 1, 1, 0, 4, 36, 2, 2, 5, 36, 6, 0, 1, 7, 5, 131, 3
+   \              240202052406
+   \              000107058303
+   \   00000029   4000               DC16 64
+   \   0000002B   0A0904010002       DC8 10, 9, 4, 1, 0, 2, 10, 0, 0, 0, 7, 5, 1, 2
+   \              0A0000000705
+   \              0102        
+   \   00000039   4000               DC16 64
+   \   0000003B   0007058202         DC8 0, 7, 5, 130, 2
+   \   00000040   4000               DC16 64
+   \   00000042   0000               DC8 0, 0
+    157          
+    158              // Standard configuration descriptor
+    159              {
+    160                  sizeof(USBConfigurationDescriptor),
+    161                  USBGenericDescriptor_CONFIGURATION,
+    162                  sizeof(CDCDSerialDriverConfigurationDescriptors),
+    163                  2, // There are two interfaces in this configuration
+    164                  1, // This is configuration #1
+    165                  0, // No string descriptor for this configuration
+    166                  BOARD_USB_BMATTRIBUTES,
+    167                  USBConfigurationDescriptor_POWER(100)
+    168              },
+    169          #if defined(BOARD_USB_OTGHS)
+    170              // OTG descriptor
+    171              {
+    172                  sizeof(USBOtgDescriptor),
+    173                  USBGenericDescriptor_OTG,
+    174                  USBOTGDescriptor_HNP_SRP
+    175              },
+    176          #endif
+    177              // Communication class interface standard descriptor
+    178              {
+    179                  sizeof(USBInterfaceDescriptor),
+    180                  USBGenericDescriptor_INTERFACE,
+    181                  0, // This is interface #0
+    182                  0, // This is alternate setting #0 for this interface
+    183                  1, // This interface uses 1 endpoint
+    184                  CDCCommunicationInterfaceDescriptor_CLASS,
+    185                  CDCCommunicationInterfaceDescriptor_ABSTRACTCONTROLMODEL,
+    186                  CDCCommunicationInterfaceDescriptor_NOPROTOCOL,
+    187                  0  // No string descriptor for this interface
+    188              },
+    189              // Class-specific header functional descriptor
+    190              {
+    191                  sizeof(CDCHeaderDescriptor),
+    192                  CDCGenericDescriptor_INTERFACE,
+    193                  CDCGenericDescriptor_HEADER,
+    194                  CDCGenericDescriptor_CDC1_10
+    195              },
+    196              // Class-specific call management functional descriptor
+    197              {
+    198                  sizeof(CDCCallManagementDescriptor),
+    199                  CDCGenericDescriptor_INTERFACE,
+    200                  CDCGenericDescriptor_CALLMANAGEMENT,
+    201                  CDCCallManagementDescriptor_SELFCALLMANAGEMENT,
+    202                  0 // No associated data interface
+    203              },
+    204              // Class-specific abstract control management functional descriptor
+    205              {
+    206                  sizeof(CDCAbstractControlManagementDescriptor),
+    207                  CDCGenericDescriptor_INTERFACE,
+    208                  CDCGenericDescriptor_ABSTRACTCONTROLMANAGEMENT,
+    209                  CDCAbstractControlManagementDescriptor_LINE
+    210              },
+    211              // Class-specific union functional descriptor with one slave interface
+    212              {
+    213                  sizeof(CDCUnionDescriptor),
+    214                  CDCGenericDescriptor_INTERFACE,
+    215                  CDCGenericDescriptor_UNION,
+    216                  0, // Number of master interface is #0
+    217                  1 // First slave interface is #1
+    218              },
+    219              // Notification endpoint standard descriptor
+    220              {
+    221                  sizeof(USBEndpointDescriptor), 
+    222                  USBGenericDescriptor_ENDPOINT,
+    223                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    224                                                CDCDSerialDriverDescriptors_NOTIFICATION),
+    225                  USBEndpointDescriptor_INTERRUPT,
+    226                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_NOTIFICATION),
+    227                      USBEndpointDescriptor_MAXINTERRUPTSIZE_FS),
+    228                  10 // Endpoint is polled every 10ms
+    229              },
+    230              // Data class interface standard descriptor
+    231              {
+    232                  sizeof(USBInterfaceDescriptor),
+    233                  USBGenericDescriptor_INTERFACE,
+    234                  1, // This is interface #1
+    235                  0, // This is alternate setting #0 for this interface
+    236                  2, // This interface uses 2 endpoints
+    237                  CDCDataInterfaceDescriptor_CLASS,
+    238                  CDCDataInterfaceDescriptor_SUBCLASS,
+    239                  CDCDataInterfaceDescriptor_NOPROTOCOL,
+    240                  0  // No string descriptor for this interface
+    241              },
+    242              // Bulk-OUT endpoint standard descriptor
+    243              {
+    244                  sizeof(USBEndpointDescriptor), 
+    245                  USBGenericDescriptor_ENDPOINT,
+    246                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_OUT,
+    247                                                CDCDSerialDriverDescriptors_DATAOUT),
+    248                  USBEndpointDescriptor_BULK,
+    249                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAOUT),
+    250                      USBEndpointDescriptor_MAXBULKSIZE_FS),
+    251                  0 // Must be 0 for full-speed bulk endpoints
+    252              },
+    253              // Bulk-IN endpoint descriptor
+    254              {
+    255                  sizeof(USBEndpointDescriptor),
+    256                  USBGenericDescriptor_ENDPOINT,
+    257                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    258                                                CDCDSerialDriverDescriptors_DATAIN),
+    259                  USBEndpointDescriptor_BULK,
+    260                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAIN),
+    261                      USBEndpointDescriptor_MAXBULKSIZE_FS),
+    262                  0 // Must be 0 for full-speed bulk endpoints
+    263              },
+    264          };
+    265          
+    266          /// Language ID string descriptor
+
+   \                                 In section .rodata, align 4
+    267          const unsigned char languageIdStringDescriptor[] = {
+   \                     languageIdStringDescriptor:
+   \   00000000   04030904           DC8 4, 3, 9, 4
+    268          
+    269              USBStringDescriptor_LENGTH(1),
+    270              USBGenericDescriptor_STRING,
+    271              USBStringDescriptor_ENGLISH_US
+    272          };
+    273          
+    274          #if defined(BOARD_USB_UDPHS) || defined(BOARD_USB_OTGHS)
+    275          /// Other-speed configuration descriptor (when in full-speed).
+    276          const CDCDSerialDriverConfigurationDescriptors otherSpeedDescriptorsFS = {
+    277          
+    278              // Standard configuration descriptor
+    279              {
+    280                  sizeof(USBConfigurationDescriptor),
+    281                  USBGenericDescriptor_OTHERSPEEDCONFIGURATION,
+    282                  sizeof(CDCDSerialDriverConfigurationDescriptors),
+    283                  2, // There are two interfaces in this configuration
+    284                  1, // This is configuration #1
+    285                  0, // No string descriptor for this configuration
+    286                  BOARD_USB_BMATTRIBUTES,
+    287                  USBConfigurationDescriptor_POWER(100)
+    288              },
+    289          #if defined(BOARD_USB_OTGHS)
+    290              // OTG descriptor
+    291              {
+    292                  sizeof(USBOtgDescriptor),
+    293                  USBGenericDescriptor_OTG,
+    294                  USBOTGDescriptor_HNP_SRP
+    295              },
+    296          #endif
+    297              // Communication class interface standard descriptor
+    298              {
+    299                  sizeof(USBInterfaceDescriptor),
+    300                  USBGenericDescriptor_INTERFACE,
+    301                  0, // This is interface #0
+    302                  0, // This is alternate setting #0 for this interface
+    303                  1, // This interface uses 1 endpoint
+    304                  CDCCommunicationInterfaceDescriptor_CLASS,
+    305                  CDCCommunicationInterfaceDescriptor_ABSTRACTCONTROLMODEL,
+    306                  CDCCommunicationInterfaceDescriptor_NOPROTOCOL,
+    307                  0  // No string descriptor for this interface
+    308              },
+    309              // Class-specific header functional descriptor
+    310              {
+    311                  sizeof(CDCHeaderDescriptor),
+    312                  CDCGenericDescriptor_INTERFACE,
+    313                  CDCGenericDescriptor_HEADER,
+    314                  CDCGenericDescriptor_CDC1_10
+    315              },
+    316              // Class-specific call management functional descriptor
+    317              {
+    318                  sizeof(CDCCallManagementDescriptor),
+    319                  CDCGenericDescriptor_INTERFACE,
+    320                  CDCGenericDescriptor_CALLMANAGEMENT,
+    321                  CDCCallManagementDescriptor_SELFCALLMANAGEMENT,
+    322                  0 // No associated data interface
+    323              },
+    324              // Class-specific abstract control management functional descriptor
+    325              {
+    326                  sizeof(CDCAbstractControlManagementDescriptor),
+    327                  CDCGenericDescriptor_INTERFACE,
+    328                  CDCGenericDescriptor_ABSTRACTCONTROLMANAGEMENT,
+    329                  CDCAbstractControlManagementDescriptor_LINE
+    330              },
+    331              // Class-specific union functional descriptor with one slave interface
+    332              {
+    333                  sizeof(CDCUnionDescriptor),
+    334                  CDCGenericDescriptor_INTERFACE,
+    335                  CDCGenericDescriptor_UNION,
+    336                  0, // Number of master interface is #0
+    337                  1 // First slave interface is #1
+    338              },
+    339              // Notification endpoint standard descriptor
+    340              {
+    341                  sizeof(USBEndpointDescriptor), 
+    342                  USBGenericDescriptor_ENDPOINT,
+    343                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    344                                                CDCDSerialDriverDescriptors_NOTIFICATION),
+    345                  USBEndpointDescriptor_INTERRUPT,
+    346                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_NOTIFICATION),
+    347                      USBEndpointDescriptor_MAXINTERRUPTSIZE_HS),
+    348                  10 // Endpoint is polled every 10ms
+    349              },
+    350              // Data class interface standard descriptor
+    351              {
+    352                  sizeof(USBInterfaceDescriptor),
+    353                  USBGenericDescriptor_INTERFACE,
+    354                  1, // This is interface #1
+    355                  0, // This is alternate setting #0 for this interface
+    356                  2, // This interface uses 2 endpoints
+    357                  CDCDataInterfaceDescriptor_CLASS,
+    358                  CDCDataInterfaceDescriptor_SUBCLASS,
+    359                  CDCDataInterfaceDescriptor_NOPROTOCOL,
+    360                  0  // No string descriptor for this interface
+    361              },
+    362              // Bulk-OUT endpoint standard descriptor
+    363              {
+    364                  sizeof(USBEndpointDescriptor), 
+    365                  USBGenericDescriptor_ENDPOINT,
+    366                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_OUT,
+    367                                                CDCDSerialDriverDescriptors_DATAOUT),
+    368                  USBEndpointDescriptor_BULK,
+    369                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAOUT),
+    370                      USBEndpointDescriptor_MAXBULKSIZE_HS),
+    371                  0 // Must be 0 for full-speed bulk endpoints
+    372              },
+    373              // Bulk-IN endpoint descriptor
+    374              {
+    375                  sizeof(USBEndpointDescriptor),
+    376                  USBGenericDescriptor_ENDPOINT,
+    377                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    378                                                CDCDSerialDriverDescriptors_DATAIN),
+    379                  USBEndpointDescriptor_BULK,
+    380                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAIN),
+    381                      USBEndpointDescriptor_MAXBULKSIZE_HS),
+    382                  0 // Must be 0 for full-speed bulk endpoints
+    383              },
+    384          };
+    385          
+    386          
+    387          /// Configuration descriptor (when in high-speed).
+    388          const CDCDSerialDriverConfigurationDescriptors configurationDescriptorsHS = {
+    389          
+    390              // Standard configuration descriptor
+    391              {
+    392                  sizeof(USBConfigurationDescriptor),
+    393                  USBGenericDescriptor_CONFIGURATION,
+    394                  sizeof(CDCDSerialDriverConfigurationDescriptors),
+    395                  2, // There are two interfaces in this configuration
+    396                  1, // This is configuration #1
+    397                  0, // No string descriptor for this configuration
+    398                  BOARD_USB_BMATTRIBUTES,
+    399                  USBConfigurationDescriptor_POWER(100)
+    400              },
+    401          #if defined(BOARD_USB_OTGHS)
+    402              // OTG descriptor
+    403              {
+    404                  sizeof(USBOtgDescriptor),
+    405                  USBGenericDescriptor_OTG,
+    406                  USBOTGDescriptor_HNP_SRP
+    407              },
+    408          #endif
+    409              // Communication class interface standard descriptor
+    410              {
+    411                  sizeof(USBInterfaceDescriptor),
+    412                  USBGenericDescriptor_INTERFACE,
+    413                  0, // This is interface #0
+    414                  0, // This is alternate setting #0 for this interface
+    415                  1, // This interface uses 1 endpoint
+    416                  CDCCommunicationInterfaceDescriptor_CLASS,
+    417                  CDCCommunicationInterfaceDescriptor_ABSTRACTCONTROLMODEL,
+    418                  CDCCommunicationInterfaceDescriptor_NOPROTOCOL,
+    419                  0  // No string descriptor for this interface
+    420              },
+    421              // Class-specific header functional descriptor
+    422              {
+    423                  sizeof(CDCHeaderDescriptor),
+    424                  CDCGenericDescriptor_INTERFACE,
+    425                  CDCGenericDescriptor_HEADER,
+    426                  CDCGenericDescriptor_CDC1_10
+    427              },
+    428              // Class-specific call management functional descriptor
+    429              {
+    430                  sizeof(CDCCallManagementDescriptor),
+    431                  CDCGenericDescriptor_INTERFACE,
+    432                  CDCGenericDescriptor_CALLMANAGEMENT,
+    433                  CDCCallManagementDescriptor_SELFCALLMANAGEMENT,
+    434                  0 // No associated data interface
+    435              },
+    436              // Class-specific abstract control management functional descriptor
+    437              {
+    438                  sizeof(CDCAbstractControlManagementDescriptor),
+    439                  CDCGenericDescriptor_INTERFACE,
+    440                  CDCGenericDescriptor_ABSTRACTCONTROLMANAGEMENT,
+    441                  CDCAbstractControlManagementDescriptor_LINE
+    442              },
+    443              // Class-specific union functional descriptor with one slave interface
+    444              {
+    445                  sizeof(CDCUnionDescriptor),
+    446                  CDCGenericDescriptor_INTERFACE,
+    447                  CDCGenericDescriptor_UNION,
+    448                  0, // Number of master interface is #0
+    449                  1 // First slave interface is #1
+    450              },
+    451              // Notification endpoint standard descriptor
+    452              {
+    453                  sizeof(USBEndpointDescriptor), 
+    454                  USBGenericDescriptor_ENDPOINT,
+    455                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    456                                                CDCDSerialDriverDescriptors_NOTIFICATION),
+    457                  USBEndpointDescriptor_INTERRUPT,
+    458                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_NOTIFICATION),
+    459                      USBEndpointDescriptor_MAXINTERRUPTSIZE_HS),
+    460                  10 // Endpoint is polled every 10ms
+    461              },
+    462              // Data class interface standard descriptor
+    463              {
+    464                  sizeof(USBInterfaceDescriptor),
+    465                  USBGenericDescriptor_INTERFACE,
+    466                  1, // This is interface #1
+    467                  0, // This is alternate setting #0 for this interface
+    468                  2, // This interface uses 2 endpoints
+    469                  CDCDataInterfaceDescriptor_CLASS,
+    470                  CDCDataInterfaceDescriptor_SUBCLASS,
+    471                  CDCDataInterfaceDescriptor_NOPROTOCOL,
+    472                  0  // No string descriptor for this interface
+    473              },
+    474              // Bulk-OUT endpoint standard descriptor
+    475              {
+    476                  sizeof(USBEndpointDescriptor), 
+    477                  USBGenericDescriptor_ENDPOINT,
+    478                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_OUT,
+    479                                                CDCDSerialDriverDescriptors_DATAOUT),
+    480                  USBEndpointDescriptor_BULK,
+    481                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAOUT),
+    482                      USBEndpointDescriptor_MAXBULKSIZE_HS),
+    483                  0 // Must be 0 for full-speed bulk endpoints
+    484              },
+    485              // Bulk-IN endpoint descriptor
+    486              {
+    487                  sizeof(USBEndpointDescriptor),
+    488                  USBGenericDescriptor_ENDPOINT,
+    489                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    490                                                CDCDSerialDriverDescriptors_DATAIN),
+    491                  USBEndpointDescriptor_BULK,
+    492                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAIN),
+    493                      USBEndpointDescriptor_MAXBULKSIZE_HS),
+    494                  0 // Must be 0 for full-speed bulk endpoints
+    495              },
+    496          };
+    497          
+    498          /// Other-speed configuration descriptor (when in high-speed).
+    499          const CDCDSerialDriverConfigurationDescriptors otherSpeedDescriptorsHS = {
+    500          
+    501              // Standard configuration descriptor
+    502              {
+    503                  sizeof(USBConfigurationDescriptor),
+    504                  USBGenericDescriptor_OTHERSPEEDCONFIGURATION,
+    505                  sizeof(CDCDSerialDriverConfigurationDescriptors),
+    506                  2, // There are two interfaces in this configuration
+    507                  1, // This is configuration #1
+    508                  0, // No string descriptor for this configuration
+    509                  BOARD_USB_BMATTRIBUTES,
+    510                  USBConfigurationDescriptor_POWER(100)
+    511              },
+    512          #if defined(BOARD_USB_OTGHS)
+    513              // OTG descriptor
+    514              {
+    515                  sizeof(USBOtgDescriptor),
+    516                  USBGenericDescriptor_OTG,
+    517                  USBOTGDescriptor_HNP_SRP
+    518              },
+    519          #endif
+    520              // Communication class interface standard descriptor
+    521              {
+    522                  sizeof(USBInterfaceDescriptor),
+    523                  USBGenericDescriptor_INTERFACE,
+    524                  0, // This is interface #0
+    525                  0, // This is alternate setting #0 for this interface
+    526                  1, // This interface uses 1 endpoint
+    527                  CDCCommunicationInterfaceDescriptor_CLASS,
+    528                  CDCCommunicationInterfaceDescriptor_ABSTRACTCONTROLMODEL,
+    529                  CDCCommunicationInterfaceDescriptor_NOPROTOCOL,
+    530                  0  // No string descriptor for this interface
+    531              },
+    532              // Class-specific header functional descriptor
+    533              {
+    534                  sizeof(CDCHeaderDescriptor),
+    535                  CDCGenericDescriptor_INTERFACE,
+    536                  CDCGenericDescriptor_HEADER,
+    537                  CDCGenericDescriptor_CDC1_10
+    538              },
+    539              // Class-specific call management functional descriptor
+    540              {
+    541                  sizeof(CDCCallManagementDescriptor),
+    542                  CDCGenericDescriptor_INTERFACE,
+    543                  CDCGenericDescriptor_CALLMANAGEMENT,
+    544                  CDCCallManagementDescriptor_SELFCALLMANAGEMENT,
+    545                  0 // No associated data interface
+    546              },
+    547              // Class-specific abstract control management functional descriptor
+    548              {
+    549                  sizeof(CDCAbstractControlManagementDescriptor),
+    550                  CDCGenericDescriptor_INTERFACE,
+    551                  CDCGenericDescriptor_ABSTRACTCONTROLMANAGEMENT,
+    552                  CDCAbstractControlManagementDescriptor_LINE
+    553              },
+    554              // Class-specific union functional descriptor with one slave interface
+    555              {
+    556                  sizeof(CDCUnionDescriptor),
+    557                  CDCGenericDescriptor_INTERFACE,
+    558                  CDCGenericDescriptor_UNION,
+    559                  0, // Number of master interface is #0
+    560                  1 // First slave interface is #1
+    561              },
+    562              // Notification endpoint standard descriptor
+    563              {
+    564                  sizeof(USBEndpointDescriptor), 
+    565                  USBGenericDescriptor_ENDPOINT,
+    566                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    567                                                CDCDSerialDriverDescriptors_NOTIFICATION),
+    568                  USBEndpointDescriptor_INTERRUPT,
+    569                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_NOTIFICATION),
+    570                      USBEndpointDescriptor_MAXINTERRUPTSIZE_FS),
+    571                  10 // Endpoint is polled every 10ms
+    572              },
+    573              // Data class interface standard descriptor
+    574              {
+    575                  sizeof(USBInterfaceDescriptor),
+    576                  USBGenericDescriptor_INTERFACE,
+    577                  1, // This is interface #1
+    578                  0, // This is alternate setting #0 for this interface
+    579                  2, // This interface uses 2 endpoints
+    580                  CDCDataInterfaceDescriptor_CLASS,
+    581                  CDCDataInterfaceDescriptor_SUBCLASS,
+    582                  CDCDataInterfaceDescriptor_NOPROTOCOL,
+    583                  0  // No string descriptor for this interface
+    584              },
+    585              // Bulk-OUT endpoint standard descriptor
+    586              {
+    587                  sizeof(USBEndpointDescriptor), 
+    588                  USBGenericDescriptor_ENDPOINT,
+    589                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_OUT,
+    590                                                CDCDSerialDriverDescriptors_DATAOUT),
+    591                  USBEndpointDescriptor_BULK,
+    592                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAOUT),
+    593                      USBEndpointDescriptor_MAXBULKSIZE_FS),
+    594                  0 // Must be 0 for full-speed bulk endpoints
+    595              },
+    596              // Bulk-IN endpoint descriptor
+    597              {
+    598                  sizeof(USBEndpointDescriptor),
+    599                  USBGenericDescriptor_ENDPOINT,
+    600                  USBEndpointDescriptor_ADDRESS(USBEndpointDescriptor_IN,
+    601                                                CDCDSerialDriverDescriptors_DATAIN),
+    602                  USBEndpointDescriptor_BULK,
+    603                  MIN(BOARD_USB_ENDPOINTS_MAXPACKETSIZE(CDCDSerialDriverDescriptors_DATAIN),
+    604                      USBEndpointDescriptor_MAXBULKSIZE_FS),
+    605                  0 // Must be 0 for full-speed bulk endpoints
+    606              },
+    607          };
+    608          #endif
+    609          
+    610          /// Product string descriptor
+
+   \                                 In section .rodata, align 4
+    611          const unsigned char productStringDescriptor[] = {
+   \                     productStringDescriptor:
+   \   00000000   1C0341005400       DC8 28, 3, 65, 0, 84, 0, 57, 0, 49, 0, 85, 0, 83, 0, 66, 0, 83, 0, 101
+   \              390031005500
+   \              530042005300
+   \              65          
+   \   00000013   007200690061       DC8 0, 114, 0, 105, 0, 97, 0, 108, 0
+   \              006C00      
+    612          
+    613              USBStringDescriptor_LENGTH(13),
+    614              USBGenericDescriptor_STRING,
+    615              USBStringDescriptor_UNICODE('A'),
+    616              USBStringDescriptor_UNICODE('T'),
+    617              USBStringDescriptor_UNICODE('9'),
+    618              USBStringDescriptor_UNICODE('1'),
+    619              USBStringDescriptor_UNICODE('U'),
+    620              USBStringDescriptor_UNICODE('S'),
+    621              USBStringDescriptor_UNICODE('B'),
+    622              USBStringDescriptor_UNICODE('S'),
+    623              USBStringDescriptor_UNICODE('e'),
+    624              USBStringDescriptor_UNICODE('r'),
+    625              USBStringDescriptor_UNICODE('i'),
+    626              USBStringDescriptor_UNICODE('a'),
+    627              USBStringDescriptor_UNICODE('l')
+    628          };
+    629          
+    630          /// List of string descriptors used by the device
+
+   \                                 In section .data, align 4
+    631          const unsigned char *stringDescriptors[] = {
+   \                     stringDescriptors:
+   \   00000000   ............       DC32 languageIdStringDescriptor, productStringDescriptor
+   \              ....        
+    632          
+    633              languageIdStringDescriptor,
+    634              productStringDescriptor,
+    635          };
+    636          
+    637          /// List of standard descriptors for the serial driver.
+
+   \                                 In section .data, align 4
+    638          USBDDriverDescriptors cdcdSerialDriverDescriptors = {
+   \                     cdcdSerialDriverDescriptors:
+   \   00000000   ............       DC32 deviceDescriptor, configurationDescriptorsFS, 0H, 0H, 0H, 0H, 0H
+   \              ....00000000
+   \              000000000000
+   \              000000000000
+   \              00000000    
+   \   0000001C   00000000....       DC32 0H, stringDescriptors
+   \              ....        
+   \   00000024   02000000           DC8 2, 0, 0, 0
+    639          
+    640              &deviceDescriptor,
+    641              (USBConfigurationDescriptor *) &(configurationDescriptorsFS),
+    642          #if defined(BOARD_USB_UDPHS) || defined(BOARD_USB_OTGHS)
+    643              &qualifierDescriptor,
+    644              (USBConfigurationDescriptor *) &(otherSpeedDescriptorsFS),
+    645              &deviceDescriptor,
+    646              (USBConfigurationDescriptor *) &(configurationDescriptorsHS),
+    647              &qualifierDescriptor,
+    648              (USBConfigurationDescriptor *) &(otherSpeedDescriptorsHS),
+    649          #else
+    650              0, // No full-speed device qualifier descriptor
+    651              0, // No full-speed other speed configuration
+    652              0, // No high-speed device descriptor
+    653              0, // No high-speed configuration descriptor
+    654              0, // No high-speed device qualifier descriptor
+    655              0, // No high-speed other speed configuration descriptor
+    656          
+    657          #endif
+    658              stringDescriptors,
+    659              2 // 2 string descriptors in list
+    660          };
+    661          
+
+
+   Section sizes:
+
+     Function/Label              Bytes
+     --------------              -----
+     deviceDescriptor              20
+     configurationDescriptorsFS    68
+     languageIdStringDescriptor     4
+     productStringDescriptor       28
+     stringDescriptors              8
+     cdcdSerialDriverDescriptors   40
+
+ 
+  48 bytes in section .data
+ 120 bytes in section .rodata
+ 
+ 120 bytes of CONST memory
+  48 bytes of DATA  memory
+
+Errors: none
+Warnings: none

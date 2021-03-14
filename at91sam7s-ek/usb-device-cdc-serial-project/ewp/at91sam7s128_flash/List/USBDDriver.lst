@@ -1,0 +1,1376 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BDDriver.c                                               #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\US #
+#                    BDDriver.c -D at91sam7s128 -D flash -D TRACE_LEVEL=3     #
+#                    -lC C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\at91sam7s128_flash\List\        #
+#                    --remarks --diag_suppress Pe826,Pe1375 -o                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBDDriver. #
+#                    lst                                                      #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBDDriver.o #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\device\core\USBDDriver.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          //------------------------------------------------------------------------------
+     31          //      Headers
+     32          //------------------------------------------------------------------------------
+     33          
+     34          #include "USBDDriver.h"
+     35          #include "USBDDriverCallbacks.h"
+     36          #include "USBD.h"
+     37          #include <board.h>
+     38          #include <utility/trace.h>
+     39          #include <usb/common/core/USBGenericDescriptor.h>
+     40          #include <usb/common/core/USBDeviceDescriptor.h>
+     41          #include <usb/common/core/USBConfigurationDescriptor.h>
+     42          #include <usb/common/core/USBDeviceQualifierDescriptor.h>
+     43          #include <usb/common/core/USBEndpointDescriptor.h>
+     44          #include <usb/common/core/USBFeatureRequest.h>
+     45          #include <usb/common/core/USBSetAddressRequest.h>
+     46          #include <usb/common/core/USBGetDescriptorRequest.h>
+     47          #include <usb/common/core/USBSetConfigurationRequest.h>
+     48          #include <usb/common/core/USBInterfaceRequest.h>
+     49          
+     50          #include <string.h>
+     51          
+     52          //------------------------------------------------------------------------------
+     53          //      Local functions
+     54          //------------------------------------------------------------------------------
+     55          #if defined(BOARD_USB_OTGHS)
+     56          static unsigned char otg_features_supported = 0;
+     57          #endif
+     58          
+     59          //------------------------------------------------------------------------------
+     60          /// Send a NULL packet
+     61          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     62          static void TerminateCtrlInWithNull(void *pArg,
+     63                                              unsigned char status,
+     64                                              unsigned int transferred,
+     65                                              unsigned int remaining)
+     66          {
+   \                     TerminateCtrlInWithNull:
+   \   00000000   00502DE9           PUSH     {R12,LR}
+     67              USBD_Write(0, // Endpoint #0
+     68                         0, // No data buffer
+     69                         0, // No data buffer
+     70                         (TransferCallback) 0,
+     71                         (void *)  0);
+   \   00000004   0000A0E3           MOV      R0,#+0
+   \   00000008   00008DE5           STR      R0,[SP, #+0]
+   \   0000000C   0030A0E3           MOV      R3,#+0
+   \   00000010   0020A0E3           MOV      R2,#+0
+   \   00000014   0010A0E3           MOV      R1,#+0
+   \   00000018   ........           BL       USBD_Write
+     72          }
+   \   0000001C   0140BDE8           POP      {R0,LR}
+   \   00000020   1EFF2FE1           BX       LR               ;; return
+     73          
+     74          //------------------------------------------------------------------------------
+     75          /// Configures the device by setting it into the Configured state and
+     76          /// initializing all endpoints.
+     77          /// \param pDriver  Pointer to a USBDDriver instance.
+     78          /// \param cfgnum  Configuration number to set.
+     79          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     80          static void SetConfiguration(USBDDriver *pDriver, unsigned char cfgnum)
+     81          {
+   \                     SetConfiguration:
+   \   00000000   70402DE9           PUSH     {R4-R6,LR}
+   \   00000004   18D04DE2           SUB      SP,SP,#+24
+   \   00000008   0040A0E1           MOV      R4,R0
+   \   0000000C   0150A0E1           MOV      R5,R1
+     82              USBEndpointDescriptor *pEndpoints[BOARD_USB_NUMENDPOINTS+1];
+     83              const USBConfigurationDescriptor *pConfiguration;
+     84          
+     85              // Use different descriptor depending on device speed
+     86              if (USBD_IsHighSpeed()) {
+   \   00000010   ........           BL       USBD_IsHighSpeed
+   \   00000014   000050E3           CMP      R0,#+0
+   \   00000018   000094E5           LDR      R0,[R4, #+0]
+     87          
+     88                  pConfiguration = pDriver->pDescriptors->pHsConfiguration;
+   \   0000001C   14609015           LDRNE    R6,[R0, #+20]
+     89              }
+     90              else {
+     91          
+     92                  pConfiguration = pDriver->pDescriptors->pFsConfiguration;
+   \   00000020   04609005           LDREQ    R6,[R0, #+4]
+     93              }
+     94          
+     95              // Set & save the desired configuration
+     96              USBD_SetConfiguration(cfgnum);
+   \   00000024   0500A0E1           MOV      R0,R5
+   \   00000028   ........           BL       USBD_SetConfiguration
+     97              pDriver->cfgnum = cfgnum;
+   \   0000002C   0850C4E5           STRB     R5,[R4, #+8]
+     98          
+     99              // If the configuration is not 0, configure endpoints
+    100              if (cfgnum != 0) {
+   \   00000030   000055E3           CMP      R5,#+0
+   \   00000034   0C00000A           BEQ      ??SetConfiguration_0
+    101              
+    102                  // Parse configuration to get endpoint descriptors
+    103                  USBConfigurationDescriptor_Parse(pConfiguration, 0, pEndpoints, 0);
+   \   00000038   0030A0E3           MOV      R3,#+0
+   \   0000003C   04208DE2           ADD      R2,SP,#+4
+   \   00000040   0010A0E3           MOV      R1,#+0
+   \   00000044   0600A0E1           MOV      R0,R6
+   \   00000048   ........           BL       USBConfigurationDescriptor_Parse
+    104              
+    105                  // Configure endpoints
+    106                  int i = 0;
+   \   0000004C   0040A0E3           MOV      R4,#+0
+   \   00000050   010000EA           B        ??SetConfiguration_1
+    107                  while (pEndpoints[i] != 0) {
+    108              
+    109                      USBD_ConfigureEndpoint(pEndpoints[i]);
+   \                     ??SetConfiguration_2:
+   \   00000054   ........           BL       USBD_ConfigureEndpoint
+    110                      i++;
+   \   00000058   014084E2           ADD      R4,R4,#+1
+    111                  }
+   \                     ??SetConfiguration_1:
+   \   0000005C   04008DE2           ADD      R0,SP,#+4
+   \   00000060   040190E7           LDR      R0,[R0, +R4, LSL #+2]
+   \   00000064   000050E3           CMP      R0,#+0
+   \   00000068   F9FFFF1A           BNE      ??SetConfiguration_2
+    112              }
+    113              // Should be done before send the ZLP
+    114              USBDDriverCallbacks_ConfigurationChanged(cfgnum);
+   \                     ??SetConfiguration_0:
+   \   0000006C   0500A0E1           MOV      R0,R5
+   \   00000070   ........           BL       USBDDriverCallbacks_ConfigurationChanged
+    115          
+    116              // Acknowledge the request
+    117              USBD_Write(0, // Endpoint #0
+    118                         0, // No data buffer
+    119                         0, // No data buffer
+    120                         (TransferCallback) 0,
+    121                         (void *)  0);
+   \   00000074   0000A0E3           MOV      R0,#+0
+   \   00000078   00008DE5           STR      R0,[SP, #+0]
+   \   0000007C   0030A0E3           MOV      R3,#+0
+   \   00000080   0020A0E3           MOV      R2,#+0
+   \   00000084   0010A0E3           MOV      R1,#+0
+   \   00000088   ........           BL       USBD_Write
+    122          }
+   \   0000008C   18D08DE2           ADD      SP,SP,#+24       ;; stack cleaning
+   \   00000090   7040BDE8           POP      {R4-R6,LR}
+   \   00000094   1EFF2FE1           BX       LR               ;; return
+    123          
+    124          //------------------------------------------------------------------------------
+    125          /// Sends the current configuration number to the host.
+    126          /// \param pDriver  Pointer to a USBDDriver instance.
+    127          //------------------------------------------------------------------------------
+    128          static void GetConfiguration(const USBDDriver *pDriver)
+    129          {
+    130              USBD_Write(0, &(pDriver->cfgnum), 1, 0, 0);
+    131          }
+    132          
+    133          //------------------------------------------------------------------------------
+    134          /// Sends the current status of the device to the host.
+    135          /// \param pDriver  Pointer to a USBDDriver instance.
+    136          //------------------------------------------------------------------------------
+    137          static void GetDeviceStatus(const USBDDriver *pDriver)
+    138          {
+
+   \                                 In section .bss, align 2
+    139              static unsigned short data;
+   \                     ??data:
+   \   00000000                      DS8 2
+   \   00000002                      DS8 2
+    140              const USBConfigurationDescriptor *pConfiguration;
+    141          
+    142              data = 0;
+    143              // Use different configuration depending on device speed
+    144              if (USBD_IsHighSpeed()) {
+    145          
+    146                  pConfiguration = pDriver->pDescriptors->pHsConfiguration;
+    147              }
+    148              else {
+    149          
+    150                  pConfiguration = pDriver->pDescriptors->pFsConfiguration;
+    151              }
+    152          
+    153              // Check current configuration for power mode (if device is configured)
+    154              if (pDriver->cfgnum != 0) {
+    155          
+    156                  if (USBConfigurationDescriptor_IsSelfPowered(pConfiguration)) {
+    157          
+    158                      data |= 1;
+    159                  }
+    160              }
+    161          
+    162              // Check if remote wake-up is enabled
+    163              if (pDriver->isRemoteWakeUpEnabled) {
+    164          
+    165                  data |= 2;
+    166              }
+    167          
+    168              // Send the device status
+    169              USBD_Write(0, &data, 2, 0, 0);
+    170          }
+    171          
+    172          //------------------------------------------------------------------------------
+    173          /// Sends the current status of an endpoints to the USB host.
+    174          /// \param bEndpoint  Endpoint number.
+    175          //------------------------------------------------------------------------------
+    176          static void GetEndpointStatus(unsigned char bEndpoint)
+    177          {
+    178              static unsigned short data;
+    179          
+    180              data = 0;
+    181              // Check if the endpoint exists
+    182              if (bEndpoint > BOARD_USB_NUMENDPOINTS) {
+    183          
+    184                  USBD_Stall(0);
+    185              }
+    186              else {
+    187          
+    188                  // Check if the endpoint if currently halted
+    189                  if (USBD_IsHalted(bEndpoint)) {
+    190          
+    191                      data = 1;
+    192                  }
+    193                  
+    194                  // Send the endpoint status
+    195                  USBD_Write(0, &data, 2, 0, 0);
+    196              }
+    197          }
+    198          
+    199          //------------------------------------------------------------------------------
+    200          /// Sends the requested USB descriptor to the host if available, or STALLs  the
+    201          /// request.
+    202          /// \param pDriver  Pointer to a USBDDriver instance.
+    203          /// \param type  Type of the requested descriptor
+    204          /// \param index  Index of the requested descriptor.
+    205          /// \param length  Maximum number of bytes to return.
+    206          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    207          static void GetDescriptor(
+    208              const USBDDriver *pDriver,
+    209              unsigned char type,
+    210              unsigned char index,
+    211              unsigned int length)
+    212          {
+   \                     GetDescriptor:
+   \   00000000   F74F2DE9           PUSH     {R0-R2,R4-R11,LR}
+   \   00000004   0040A0E1           MOV      R4,R0
+   \   00000008   0150A0E1           MOV      R5,R1
+   \   0000000C   0360A0E1           MOV      R6,R3
+    213              const USBDeviceDescriptor *pDevice;
+    214              const USBConfigurationDescriptor *pConfiguration;
+    215              const USBDeviceQualifierDescriptor *pQualifier;
+    216              const USBConfigurationDescriptor *pOtherSpeed;
+    217              const USBGenericDescriptor **pStrings =
+    218                  (const USBGenericDescriptor **) pDriver->pDescriptors->pStrings;
+   \   00000010   000094E5           LDR      R0,[R4, #+0]
+   \   00000014   202090E5           LDR      R2,[R0, #+32]
+   \   00000018   04208DE5           STR      R2,[SP, #+4]
+    219              unsigned char numStrings = pDriver->pDescriptors->numStrings;
+   \   0000001C   2400D0E5           LDRB     R0,[R0, #+36]
+   \   00000020   00008DE5           STR      R0,[SP, #+0]
+    220              const USBGenericDescriptor *pString;
+    221          
+    222              // Use different set of descriptors depending on device speed
+    223              if (USBD_IsHighSpeed()) {
+   \   00000024   ........           BL       USBD_IsHighSpeed
+   \   00000028   000050E3           CMP      R0,#+0
+   \   0000002C   000094E5           LDR      R0,[R4, #+0]
+    224          
+    225                  TRACE_DEBUG("HS ");
+    226                  pDevice = pDriver->pDescriptors->pHsDevice;
+   \   00000030   10709015           LDRNE    R7,[R0, #+16]
+    227                  pConfiguration = pDriver->pDescriptors->pHsConfiguration;
+   \   00000034   14809015           LDRNE    R8,[R0, #+20]
+    228                  pQualifier = pDriver->pDescriptors->pHsQualifier;
+   \   00000038   18909015           LDRNE    R9,[R0, #+24]
+    229                  pOtherSpeed = pDriver->pDescriptors->pHsOtherSpeed;
+   \   0000003C   1CB09015           LDRNE    R11,[R0, #+28]
+    230              }
+    231              else {
+    232          
+    233                  TRACE_DEBUG("FS ");
+    234                  pDevice = pDriver->pDescriptors->pFsDevice;
+   \   00000040   00709005           LDREQ    R7,[R0, #+0]
+    235                  pConfiguration = pDriver->pDescriptors->pFsConfiguration;
+   \   00000044   04809005           LDREQ    R8,[R0, #+4]
+    236                  pQualifier = pDriver->pDescriptors->pFsQualifier;
+   \   00000048   08909005           LDREQ    R9,[R0, #+8]
+    237                  pOtherSpeed = pDriver->pDescriptors->pFsOtherSpeed;
+   \   0000004C   0CB09005           LDREQ    R11,[R0, #+12]
+    238              }
+    239          
+    240              // Check the descriptor type
+    241              switch (type) {
+   \   00000050   ........           LDR      R10,??DataTable1
+   \   00000054   010045E2           SUB      R0,R5,#+1
+   \   00000058   060050E3           CMP      R0,#+6
+   \   0000005C   6200008A           BHI      ??GetDescriptor_1
+   \   00000060   0010DFE7           LDRB     R1,[PC, R0]
+   \   00000064   01F18FE0           ADD      PC,PC,R1, LSL #+2
+   \                     ??GetDescriptor_0:
+   \   00000068   01104860           DC8      0x1,0x10,0x48,0x60
+   \   0000006C   60223400           DC8      0x60,0x22,0x34,0x0
+    242                  
+    243                  case USBGenericDescriptor_DEVICE:
+    244                      TRACE_INFO_WP("Dev ");
+    245          
+    246                      // Adjust length and send descriptor
+    247                      if (length > USBGenericDescriptor_GetLength((USBGenericDescriptor *) pDevice)) {
+   \                     ??GetDescriptor_2:
+   \   00000070   0700A0E1           MOV      R0,R7
+   \   00000074   ........           BL       USBGenericDescriptor_GetLength
+   \   00000078   060050E1           CMP      R0,R6
+   \   0000007C   0200002A           BCS      ??GetDescriptor_3
+    248          
+    249                          length = USBGenericDescriptor_GetLength((USBGenericDescriptor *) pDevice);
+   \   00000080   0700A0E1           MOV      R0,R7
+   \   00000084   ........           BL       USBGenericDescriptor_GetLength
+   \   00000088   0060A0E1           MOV      R6,R0
+    250                      }
+    251                      USBD_Write(0, pDevice, length, 0, 0);
+   \                     ??GetDescriptor_3:
+   \   0000008C   0000A0E3           MOV      R0,#+0
+   \   00000090   00008DE5           STR      R0,[SP, #+0]
+   \   00000094   0030A0E3           MOV      R3,#+0
+   \   00000098   0620A0E1           MOV      R2,R6
+   \   0000009C   0710A0E1           MOV      R1,R7
+   \                     ??GetDescriptor_4:
+   \   000000A0   ........           BL       USBD_Write
+    252                      break;
+    253          
+    254                  case USBGenericDescriptor_CONFIGURATION:
+    255                      TRACE_INFO_WP("Cfg ");
+    256          
+    257                      // Adjust length and send descriptor
+    258                      if (length > USBConfigurationDescriptor_GetTotalLength(pConfiguration)) {
+    259          
+    260                          length = USBConfigurationDescriptor_GetTotalLength(pConfiguration);
+    261                      }
+    262                      USBD_Write(0,
+    263                                 pConfiguration,
+    264                                 length,
+    265                                 ((length % pDevice->bMaxPacketSize0) == 0) ? TerminateCtrlInWithNull : 0,
+    266                                 0);
+    267                      break;
+    268          
+    269                  case USBGenericDescriptor_DEVICEQUALIFIER:
+    270                      TRACE_INFO_WP("Qua ");
+    271          
+    272                      // Check if descriptor exists
+    273                      if (!pQualifier) {
+    274          
+    275                          USBD_Stall(0);
+    276                      }
+    277                      else {
+    278          
+    279                          // Adjust length and send descriptor
+    280                          if (length > USBGenericDescriptor_GetLength((USBGenericDescriptor *) pQualifier)) {
+    281          
+    282                              length = USBGenericDescriptor_GetLength((USBGenericDescriptor *) pQualifier);
+    283                          }
+    284                          USBD_Write(0, pQualifier, length, 0, 0);
+    285                      }
+    286                      break;
+    287          
+    288                  case USBGenericDescriptor_OTHERSPEEDCONFIGURATION:
+    289                      TRACE_INFO_WP("OSC ");
+    290          
+    291                      // Check if descriptor exists
+    292                      if (!pOtherSpeed) {
+    293          
+    294                          USBD_Stall(0);
+    295                      }
+    296                      else {
+    297          
+    298                          // Adjust length and send descriptor
+    299                          if (length > USBConfigurationDescriptor_GetTotalLength(pOtherSpeed)) {
+    300          
+    301                              length = USBConfigurationDescriptor_GetTotalLength(pOtherSpeed);
+    302                          }
+    303                          USBD_Write(0,
+    304                                     pOtherSpeed,
+    305                                     length,
+    306                                     ((length % pDevice->bMaxPacketSize0) == 0) ? TerminateCtrlInWithNull : 0,
+    307                                     0);
+    308                      }
+    309                      break;
+    310          
+    311                  case USBGenericDescriptor_STRING:
+    312                      TRACE_INFO_WP("Str%d ", index);
+    313          
+    314                      // Check if descriptor exists
+    315                      if (index > numStrings) {
+    316          
+    317                          USBD_Stall(0);
+    318                      }
+    319                      else {
+    320          
+    321                          pString = pStrings[index];
+    322          
+    323                          // Adjust length and send descriptor
+    324                          if (length > USBGenericDescriptor_GetLength(pString)) {
+    325          
+    326                              length = USBGenericDescriptor_GetLength(pString);
+    327                          }
+    328                          USBD_Write(0,
+    329                                     pString,
+    330                                     length,
+    331                                     ((length % pDevice->bMaxPacketSize0) == 0) ? TerminateCtrlInWithNull : 0,
+    332                                     0);
+    333                      }
+    334                      break;
+    335          
+    336                  default:
+    337                      TRACE_WARNING(
+    338                                "USBDDriver_GetDescriptor: Unknown descriptor type (%d)\n\r",
+    339                                type);
+    340                      USBD_Stall(0);
+    341              }
+    342          }
+   \                     ??GetDescriptor_5:
+   \   000000A4   F74FBDE8           POP      {R0-R2,R4-R11,LR}
+   \   000000A8   1EFF2FE1           BX       LR               ;; return
+   \                     ??GetDescriptor_6:
+   \   000000AC   0800A0E1           MOV      R0,R8
+   \   000000B0   ........           BL       USBConfigurationDescriptor_GetTotalLength
+   \   000000B4   060050E1           CMP      R0,R6
+   \   000000B8   0200002A           BCS      ??GetDescriptor_7
+   \   000000BC   0800A0E1           MOV      R0,R8
+   \   000000C0   ........           BL       USBConfigurationDescriptor_GetTotalLength
+   \   000000C4   0060A0E1           MOV      R6,R0
+   \                     ??GetDescriptor_7:
+   \   000000C8   0600A0E1           MOV      R0,R6
+   \   000000CC   0710D7E5           LDRB     R1,[R7, #+7]
+   \   000000D0   ........           BL       __aeabi_uidivmod
+   \   000000D4   000051E3           CMP      R1,#+0
+   \   000000D8   0A30A001           MOVEQ    R3,R10
+   \   000000DC   0030A013           MOVNE    R3,#+0
+   \   000000E0   0000A0E3           MOV      R0,#+0
+   \   000000E4   00008DE5           STR      R0,[SP, #+0]
+   \   000000E8   0620A0E1           MOV      R2,R6
+   \   000000EC   0810A0E1           MOV      R1,R8
+   \   000000F0   EAFFFFEA           B        ??GetDescriptor_4
+   \                     ??GetDescriptor_8:
+   \   000000F4   000059E3           CMP      R9,#+0
+   \   000000F8   0200001A           BNE      ??GetDescriptor_9
+   \                     ??GetDescriptor_10:
+   \   000000FC   0000A0E3           MOV      R0,#+0
+   \   00000100   ........           BL       USBD_Stall
+   \   00000104   E6FFFFEA           B        ??GetDescriptor_5
+   \                     ??GetDescriptor_9:
+   \   00000108   0900A0E1           MOV      R0,R9
+   \   0000010C   ........           BL       USBGenericDescriptor_GetLength
+   \   00000110   060050E1           CMP      R0,R6
+   \   00000114   0200002A           BCS      ??GetDescriptor_11
+   \   00000118   0900A0E1           MOV      R0,R9
+   \   0000011C   ........           BL       USBGenericDescriptor_GetLength
+   \   00000120   0060A0E1           MOV      R6,R0
+   \                     ??GetDescriptor_11:
+   \   00000124   0000A0E3           MOV      R0,#+0
+   \   00000128   00008DE5           STR      R0,[SP, #+0]
+   \   0000012C   0030A0E3           MOV      R3,#+0
+   \   00000130   0620A0E1           MOV      R2,R6
+   \   00000134   0910A0E1           MOV      R1,R9
+   \   00000138   D8FFFFEA           B        ??GetDescriptor_4
+   \                     ??GetDescriptor_12:
+   \   0000013C   00005BE3           CMP      R11,#+0
+   \   00000140   EDFFFF0A           BEQ      ??GetDescriptor_10
+   \   00000144   0B00A0E1           MOV      R0,R11
+   \   00000148   ........           BL       USBConfigurationDescriptor_GetTotalLength
+   \   0000014C   060050E1           CMP      R0,R6
+   \   00000150   0200002A           BCS      ??GetDescriptor_13
+   \   00000154   0B00A0E1           MOV      R0,R11
+   \   00000158   ........           BL       USBConfigurationDescriptor_GetTotalLength
+   \   0000015C   0060A0E1           MOV      R6,R0
+   \                     ??GetDescriptor_13:
+   \   00000160   0600A0E1           MOV      R0,R6
+   \   00000164   0710D7E5           LDRB     R1,[R7, #+7]
+   \   00000168   ........           BL       __aeabi_uidivmod
+   \   0000016C   000051E3           CMP      R1,#+0
+   \   00000170   00A0A013           MOVNE    R10,#+0
+   \   00000174   0000A0E3           MOV      R0,#+0
+   \   00000178   00008DE5           STR      R0,[SP, #+0]
+   \   0000017C   0A30A0E1           MOV      R3,R10
+   \   00000180   0620A0E1           MOV      R2,R6
+   \   00000184   0B10A0E1           MOV      R1,R11
+   \   00000188   C4FFFFEA           B        ??GetDescriptor_4
+   \                     ??GetDescriptor_14:
+   \   0000018C   0800DDE5           LDRB     R0,[SP, #+8]
+   \   00000190   00109DE5           LDR      R1,[SP, #+0]
+   \   00000194   000051E1           CMP      R1,R0
+   \   00000198   D7FFFFBA           BLT      ??GetDescriptor_10
+   \   0000019C   04109DE5           LDR      R1,[SP, #+4]
+   \   000001A0   005191E7           LDR      R5,[R1, +R0, LSL #+2]
+   \   000001A4   0500A0E1           MOV      R0,R5
+   \   000001A8   ........           BL       USBGenericDescriptor_GetLength
+   \   000001AC   060050E1           CMP      R0,R6
+   \   000001B0   0200002A           BCS      ??GetDescriptor_15
+   \   000001B4   0500A0E1           MOV      R0,R5
+   \   000001B8   ........           BL       USBGenericDescriptor_GetLength
+   \   000001BC   0060A0E1           MOV      R6,R0
+   \                     ??GetDescriptor_15:
+   \   000001C0   0600A0E1           MOV      R0,R6
+   \   000001C4   0710D7E5           LDRB     R1,[R7, #+7]
+   \   000001C8   ........           BL       __aeabi_uidivmod
+   \   000001CC   000051E3           CMP      R1,#+0
+   \   000001D0   00A0A013           MOVNE    R10,#+0
+   \   000001D4   0000A0E3           MOV      R0,#+0
+   \   000001D8   00008DE5           STR      R0,[SP, #+0]
+   \   000001DC   0A30A0E1           MOV      R3,R10
+   \   000001E0   0620A0E1           MOV      R2,R6
+   \   000001E4   0510A0E1           MOV      R1,R5
+   \   000001E8   ACFFFFEA           B        ??GetDescriptor_4
+   \                     ??GetDescriptor_1:
+   \   000001EC   0510A0E1           MOV      R1,R5
+   \   000001F0   ........           LDR      R0,??DataTable1_1
+   \   000001F4   ........           BL       printf
+   \   000001F8   BFFFFFEA           B        ??GetDescriptor_10
+    343          
+    344          //------------------------------------------------------------------------------
+    345          /// Sets the active setting of the given interface if the configuration supports
+    346          /// it; otherwise, the control pipe is STALLed. If the setting of an interface
+    347          /// changes.
+    348          /// \parma pDriver  Pointer to a USBDDriver instance.
+    349          /// \parma infnum  Interface number.
+    350          /// \parma setting  New active setting for the interface.
+    351          //------------------------------------------------------------------------------
+    352          static void SetInterface(
+    353              USBDDriver *pDriver,
+    354              unsigned char infnum,
+    355              unsigned char setting)
+    356          {
+    357              // Make sure alternate settings are supported
+    358              if (!pDriver->pInterfaces) {
+    359          
+    360                  USBD_Stall(0);
+    361              }
+    362              else {
+    363          
+    364                  // Change the current setting of the interface and trigger the callback 
+    365                  // if necessary
+    366                  if (pDriver->pInterfaces[infnum] != setting) {
+    367          
+    368                      pDriver->pInterfaces[infnum] = setting;
+    369                      USBDDriverCallbacks_InterfaceSettingChanged(infnum, setting);
+    370                  }
+    371          
+    372                  // Acknowledge the request
+    373                  USBD_Write(0, 0, 0, 0, 0);
+    374              }
+    375          }
+    376          
+    377          //------------------------------------------------------------------------------
+    378          /// Sends the currently active setting of the given interface to the USB
+    379          /// host. If alternate settings are not supported, this function STALLs the
+    380          /// control pipe.
+    381          /// \param pDriver  Pointer to a USBDDriver instance.
+    382          /// \param infnum  Interface number.
+    383          //------------------------------------------------------------------------------
+    384          static void GetInterface(
+    385              const USBDDriver *pDriver,
+    386              unsigned char infnum)
+    387          {
+    388              // Make sure alternate settings are supported, or STALL the control pipe
+    389              if (!pDriver->pInterfaces) {
+    390          
+    391                  USBD_Stall(0);
+    392              }
+    393              else {
+    394          
+    395                  // Sends the current interface setting to the host
+    396                  USBD_Write(0, &(pDriver->pInterfaces[infnum]), 1, 0, 0);
+    397              }
+    398          }
+    399          
+    400          #if defined(BOARD_USB_UDPHS) || defined(BOARD_USB_OTGHS)
+    401          //------------------------------------------------------------------------------
+    402          // Performs the selected test on the USB device (high-speed only).
+    403          // \param test  Test selector value.
+    404          //------------------------------------------------------------------------------
+    405          static void USBDDriver_Test(unsigned char test)
+    406          {
+    407              TRACE_DEBUG("UDPHS_Test\n\r");
+    408          
+    409              // the lower byte of wIndex must be zero
+    410              // the most significant byte of wIndex is used to specify the specific test mode
+    411              switch (test) {
+    412                  case USBFeatureRequest_TESTPACKET:
+    413                      //Test mode Test_Packet: 
+    414                      //Upon command, a port must repetitively transmit the following test packet until
+    415                      //the exit action is taken. This enables the testing of rise and fall times, eye 
+    416                      //patterns, jitter, and any other dynamic waveform specifications.
+    417                      //The test packet is made up by concatenating the following strings. 
+    418                      //(Note: For J/K NRZI data, and for NRZ data, the bit on the left is the first one 
+    419                      //transmitted. “S” indicates that a bit stuff occurs, which inserts an “extra” NRZI data bit. 
+    420                      //“* N” is used to indicate N occurrences of a string of bits or symbols.)
+    421                      //A port in Test_Packet mode must send this packet repetitively. The inter-packet timing 
+    422                      //must be no less than the minimum allowable inter-packet gap as defined in Section 7.1.18 and 
+    423                      //no greater than 125 us.
+    424                      // Send ZLP
+    425                      USBD_Test(USBFeatureRequest_TESTSENDZLP);
+    426                      // Tst PACKET
+    427                      USBD_Test(USBFeatureRequest_TESTPACKET);
+    428                      while (1);
+    429                      //break; not reached
+    430          
+    431                  case USBFeatureRequest_TESTJ:
+    432                      //Test mode Test_J:
+    433                      //Upon command, a port’s transceiver must enter the high-speed J state and remain in that
+    434                      //state until the exit action is taken. This enables the testing of the high output drive
+    435                      //level on the D+ line.
+    436                      // Send ZLP
+    437                      USBD_Test(USBFeatureRequest_TESTSENDZLP);
+    438                      // Tst J
+    439                      USBD_Test(USBFeatureRequest_TESTJ);
+    440                      while (1);
+    441                      //break; not reached
+    442          
+    443                  case USBFeatureRequest_TESTK:
+    444                      //Test mode Test_K:
+    445                      //Upon command, a port’s transceiver must enter the high-speed K state and remain in
+    446                      //that state until the exit action is taken. This enables the testing of the high output drive
+    447                      //level on the D- line.
+    448                      // Send a ZLP
+    449                      USBD_Test(USBFeatureRequest_TESTSENDZLP);
+    450                      USBD_Test(USBFeatureRequest_TESTK);
+    451                      while (1);
+    452                      //break; not reached
+    453          
+    454                  case USBFeatureRequest_TESTSE0NAK:
+    455                      //Test mode Test_SE0_NAK:
+    456                      //Upon command, a port’s transceiver must enter the high-speed receive mode
+    457                      //and remain in that mode until the exit action is taken. This enables the testing
+    458                      //of output impedance, low level output voltage, and loading characteristics.
+    459                      //In addition, while in this mode, upstream facing ports (and only upstream facing ports)
+    460                      //must respond to any IN token packet with a NAK handshake (only if the packet CRC is
+    461                      //determined to be correct) within the normal allowed device response time. This enables testing of
+    462                      //the device squelch level circuitry and, additionally, provides a general purpose stimulus/response
+    463                      //test for basic functional testing.
+    464                      USBD_Test(USBFeatureRequest_TESTSE0NAK);
+    465                      // Send a ZLP
+    466                      USBD_Test(USBFeatureRequest_TESTSENDZLP);
+    467                      while (1);
+    468                      //break; not reached
+    469          
+    470                  default:
+    471                      USBD_Stall( 0 );
+    472                      break;
+    473          
+    474              }
+    475              // The exit action is to power cycle the device.
+    476              // The device must be disconnected from the host
+    477          }
+    478          #endif
+    479          
+    480          //------------------------------------------------------------------------------
+    481          //      Exported functions
+    482          //------------------------------------------------------------------------------
+    483          
+    484          //------------------------------------------------------------------------------
+    485          /// Initializes a USBDDriver instance with a list of descriptors. If
+    486          /// interfaces can have multiple alternate settings, an array to store the
+    487          /// current setting for each interface must be provided.
+    488          /// \param pDriver  Pointer to a USBDDriver instance.
+    489          /// \param pDescriptors  Pointer to a USBDDriverDescriptors instance.
+    490          /// \param pInterfaces  Pointer to an array for storing the current alternate
+    491          ///                     setting of each interface (optional).
+    492          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    493          void USBDDriver_Initialize(
+    494              USBDDriver *pDriver,
+    495              const USBDDriverDescriptors *pDescriptors,
+    496              unsigned char *pInterfaces)
+    497          {
+   \                     USBDDriver_Initialize:
+   \   00000000   00402DE9           PUSH     {LR}
+   \   00000004   0230B0E1           MOVS     R3,R2
+    498          
+    499              pDriver->cfgnum = 0;
+   \   00000008   0020A0E3           MOV      R2,#+0
+   \   0000000C   0820C0E5           STRB     R2,[R0, #+8]
+    500          #if (BOARD_USB_BMATTRIBUTES == USBConfigurationDescriptor_SELFPOWERED_RWAKEUP) \
+    501              || (BOARD_USB_BMATTRIBUTES == USBConfigurationDescriptor_BUSPOWERED_RWAKEUP)
+    502              pDriver->isRemoteWakeUpEnabled = 1;
+    503          #else
+    504              pDriver->isRemoteWakeUpEnabled = 0;
+   \   00000010   0920C0E5           STRB     R2,[R0, #+9]
+    505          #endif
+    506          
+    507              pDriver->pDescriptors = pDescriptors;
+   \   00000014   001080E5           STR      R1,[R0, #+0]
+    508              pDriver->pInterfaces = pInterfaces;
+   \   00000018   043080E5           STR      R3,[R0, #+4]
+    509          
+    510              // Initialize interfaces array if not null
+    511              if (pInterfaces != 0) {
+   \   0000001C   0300000A           BEQ      ??USBDDriver_Initialize_0
+    512              
+    513                  memset(pInterfaces, sizeof(pInterfaces), 0);
+   \   00000020   0420A0E3           MOV      R2,#+4
+   \   00000024   0010A0E3           MOV      R1,#+0
+   \   00000028   0300A0E1           MOV      R0,R3
+   \   0000002C   ........           BL       __aeabi_memset
+    514              }
+    515          }
+   \                     ??USBDDriver_Initialize_0:
+   \   00000030   0040BDE8           POP      {LR}
+   \   00000034   1EFF2FE1           BX       LR               ;; return
+    516          
+    517          //------------------------------------------------------------------------------
+    518          /// Handles the given request if it is standard, otherwise STALLs it.
+    519          /// \param pDriver  Pointer to a USBDDriver instance.
+    520          /// \param pRequest  Pointer to a USBGenericRequest instance.
+    521          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    522          void USBDDriver_RequestHandler(
+    523              USBDDriver *pDriver,
+    524              const USBGenericRequest *pRequest)
+    525          {
+   \                     USBDDriver_RequestHandler:
+   \   00000000   F8432DE9           PUSH     {R3-R9,LR}
+   \   00000004   0050A0E1           MOV      R5,R0
+   \   00000008   0160A0E1           MOV      R6,R1
+    526              unsigned char cfgnum;
+    527              unsigned char infnum;
+    528              unsigned char eptnum;
+    529              unsigned char setting;
+    530              unsigned char type;
+    531              unsigned char index;
+    532              unsigned int length;
+    533              unsigned int address;
+    534          
+    535              TRACE_INFO_WP("Std ");
+    536          
+    537              // Check request code
+    538              switch (USBGenericRequest_GetRequest(pRequest)) {
+   \   0000000C   ........           LDR      R4,??DataTable1_2
+   \   00000010   0080A0E3           MOV      R8,#+0
+   \   00000014   0190A0E3           MOV      R9,#+1
+   \   00000018   0600A0E1           MOV      R0,R6
+   \   0000001C   ........           BL       USBGenericRequest_GetRequest
+   \   00000020   0B0050E3           CMP      R0,#+11
+   \   00000024   A800008A           BHI      ??USBDDriver_RequestHandler_1
+   \   00000028   0010DFE7           LDRB     R1,[PC, R0]
+   \   0000002C   01F18FE0           ADD      PC,PC,R1, LSL #+2
+   \                     ??USBDDriver_RequestHandler_0:
+   \   00000030   255AA676           DC8      0x25,0x5A,0xA6,0x76
+   \   00000034   A61002A6           DC8      0xA6,0x10,0x2,0xA6
+   \   00000038   1F199C87           DC8      0x1F,0x19,0x9C,0x87
+    539          
+    540                  case USBGenericRequest_GETDESCRIPTOR:
+    541                      TRACE_INFO_WP("gDesc ");
+    542          
+    543                      // Send the requested descriptor
+    544                      type = USBGetDescriptorRequest_GetDescriptorType(pRequest);
+   \                     ??USBDDriver_RequestHandler_2:
+   \   0000003C   0600A0E1           MOV      R0,R6
+   \   00000040   ........           BL       USBGetDescriptorRequest_GetDescriptorType
+   \   00000044   0040A0E1           MOV      R4,R0
+    545                      index = USBGetDescriptorRequest_GetDescriptorIndex(pRequest);
+   \   00000048   0600A0E1           MOV      R0,R6
+   \   0000004C   ........           BL       USBGetDescriptorRequest_GetDescriptorIndex
+   \   00000050   0070A0E1           MOV      R7,R0
+    546                      length = USBGenericRequest_GetLength(pRequest);
+   \   00000054   0600A0E1           MOV      R0,R6
+   \   00000058   ........           BL       USBGenericRequest_GetLength
+    547                      GetDescriptor(pDriver, type, index, length);
+   \   0000005C   0030A0E1           MOV      R3,R0
+   \   00000060   0720A0E1           MOV      R2,R7
+   \   00000064   0410A0E1           MOV      R1,R4
+   \   00000068   0500A0E1           MOV      R0,R5
+   \   0000006C   ........           BL       GetDescriptor
+   \   00000070   9C0000EA           B        ??USBDDriver_RequestHandler_3
+    548                      break;
+    549          
+    550                  case USBGenericRequest_SETADDRESS:
+    551                      TRACE_INFO_WP("sAddr ");
+    552          
+    553                      // Sends a zero-length packet and then set the device address
+    554                      address = USBSetAddressRequest_GetAddress(pRequest);
+   \                     ??USBDDriver_RequestHandler_4:
+   \   00000074   0600A0E1           MOV      R0,R6
+   \   00000078   ........           BL       USBSetAddressRequest_GetAddress
+    555                      USBD_Write(0, 0, 0, (TransferCallback) USBD_SetAddress, (void *) address);
+   \   0000007C   00008DE5           STR      R0,[SP, #+0]
+   \   00000080   ........           LDR      R3,??DataTable1_3
+   \   00000084   0020A0E3           MOV      R2,#+0
+   \   00000088   0010A0E3           MOV      R1,#+0
+   \                     ??USBDDriver_RequestHandler_5:
+   \   0000008C   0000A0E3           MOV      R0,#+0
+   \                     ??USBDDriver_RequestHandler_6:
+   \   00000090   ........           BL       USBD_Write
+   \   00000094   930000EA           B        ??USBDDriver_RequestHandler_3
+    556                      break;
+    557          
+    558                  case USBGenericRequest_SETCONFIGURATION:
+    559                      TRACE_INFO_WP("sCfg ");
+    560          
+    561                      // Set the requested configuration
+    562                      cfgnum = USBSetConfigurationRequest_GetConfiguration(pRequest);
+   \                     ??USBDDriver_RequestHandler_7:
+   \   00000098   0600A0E1           MOV      R0,R6
+   \   0000009C   ........           BL       USBSetConfigurationRequest_GetConfiguration
+   \   000000A0   0010A0E1           MOV      R1,R0
+    563                      SetConfiguration(pDriver, cfgnum);
+   \   000000A4   0500A0E1           MOV      R0,R5
+   \   000000A8   ........           BL       SetConfiguration
+   \   000000AC   8D0000EA           B        ??USBDDriver_RequestHandler_3
+    564                      break;
+    565          
+    566                  case USBGenericRequest_GETCONFIGURATION:
+    567                      TRACE_INFO_WP("gCfg ");
+    568          
+    569                      // Send the current configuration number
+    570                      GetConfiguration(pDriver);
+   \                     ??USBDDriver_RequestHandler_8:
+   \   000000B0   0000A0E3           MOV      R0,#+0
+   \   000000B4   00008DE5           STR      R0,[SP, #+0]
+   \   000000B8   0030A0E3           MOV      R3,#+0
+   \   000000BC   0120A0E3           MOV      R2,#+1
+   \   000000C0   081085E2           ADD      R1,R5,#+8
+   \   000000C4   F1FFFFEA           B        ??USBDDriver_RequestHandler_6
+    571                      break;
+    572          
+    573                  case USBGenericRequest_GETSTATUS:
+    574                      TRACE_INFO_WP("gSta ");
+    575              
+    576                      // Check who is the recipient
+    577                      switch (USBGenericRequest_GetRecipient(pRequest)) {
+   \                     ??USBDDriver_RequestHandler_9:
+   \   000000C8   ........           LDR      R7,??DataTable1_4
+   \   000000CC   0600A0E1           MOV      R0,R6
+   \   000000D0   ........           BL       USBGenericRequest_GetRecipient
+   \   000000D4   000050E3           CMP      R0,#+0
+   \   000000D8   0200000A           BEQ      ??USBDDriver_RequestHandler_10
+   \   000000DC   020050E2           SUBS     R0,R0,#+2
+   \   000000E0   1A00000A           BEQ      ??USBDDriver_RequestHandler_11
+   \   000000E4   270000EA           B        ??USBDDriver_RequestHandler_12
+    578              
+    579                          case USBGenericRequest_DEVICE:
+    580                              TRACE_INFO_WP("Dev ");
+    581              
+    582                              // Send the device status
+    583                              GetDeviceStatus(pDriver);
+   \                     ??USBDDriver_RequestHandler_10:
+   \   000000E8   B080C7E1           STRH     R8,[R7, #+0]
+   \   000000EC   ........           BL       USBD_IsHighSpeed
+   \   000000F0   000050E3           CMP      R0,#+0
+   \   000000F4   000095E5           LDR      R0,[R5, #+0]
+   \   000000F8   14009015           LDRNE    R0,[R0, #+20]
+   \   000000FC   04009005           LDREQ    R0,[R0, #+4]
+   \   00000100   0810D5E5           LDRB     R1,[R5, #+8]
+   \   00000104   000051E3           CMP      R1,#+0
+   \   00000108   0400000A           BEQ      ??USBDDriver_RequestHandler_13
+   \   0000010C   ........           BL       USBConfigurationDescriptor_IsSelfPowered
+   \   00000110   000050E3           CMP      R0,#+0
+   \   00000114   B000D711           LDRHNE   R0,[R7, #+0]
+   \   00000118   01008013           ORRNE    R0,R0,#0x1
+   \   0000011C   B000C711           STRHNE   R0,[R7, #+0]
+   \                     ??USBDDriver_RequestHandler_13:
+   \   00000120   0900D5E5           LDRB     R0,[R5, #+9]
+   \   00000124   000050E3           CMP      R0,#+0
+   \   00000128   B000D711           LDRHNE   R0,[R7, #+0]
+   \   0000012C   02008013           ORRNE    R0,R0,#0x2
+   \   00000130   B000C711           STRHNE   R0,[R7, #+0]
+   \   00000134   0000A013           MOVNE    R0,#+0
+   \   00000138   00008DE5           STR      R0,[SP, #+0]
+   \   0000013C   0030A0E3           MOV      R3,#+0
+   \   00000140   0220A0E3           MOV      R2,#+2
+   \   00000144   0710A0E1           MOV      R1,R7
+   \   00000148   0000A0E3           MOV      R0,#+0
+   \                     ??USBDDriver_RequestHandler_14:
+   \   0000014C   CFFFFFEA           B        ??USBDDriver_RequestHandler_6
+    584                              break;
+    585              
+    586                          case USBGenericRequest_ENDPOINT:
+    587                              TRACE_INFO_WP("Ept ");
+    588              
+    589                              // Send the endpoint status
+    590                              eptnum = USBGenericRequest_GetEndpointNumber(pRequest);
+    591                              GetEndpointStatus(eptnum);
+   \                     ??USBDDriver_RequestHandler_11:
+   \   00000150   0600A0E1           MOV      R0,R6
+   \   00000154   ........           BL       USBGenericRequest_GetEndpointNumber
+   \   00000158   B280C7E1           STRH     R8,[R7, #+2]
+   \   0000015C   050050E3           CMP      R0,#+5
+   \   00000160   5E00002A           BCS      ??USBDDriver_RequestHandler_15
+   \   00000164   ........           BL       USBD_IsHalted
+   \   00000168   000050E3           CMP      R0,#+0
+   \   0000016C   B290C711           STRHNE   R9,[R7, #+2]
+   \   00000170   0000A013           MOVNE    R0,#+0
+   \   00000174   00008DE5           STR      R0,[SP, #+0]
+   \   00000178   0030A0E3           MOV      R3,#+0
+   \   0000017C   0220A0E3           MOV      R2,#+2
+   \   00000180   021087E2           ADD      R1,R7,#+2
+   \   00000184   C0FFFFEA           B        ??USBDDriver_RequestHandler_5
+    592                              break;
+    593              
+    594                          default:
+    595                              TRACE_WARNING(
+    596                                        "USBDDriver_RequestHandler: Unknown recipient (%d)\n\r",
+    597                                        USBGenericRequest_GetRecipient(pRequest));
+   \                     ??USBDDriver_RequestHandler_12:
+   \   00000188   0600A0E1           MOV      R0,R6
+   \   0000018C   ........           BL       USBGenericRequest_GetRecipient
+   \   00000190   0010A0E1           MOV      R1,R0
+   \   00000194   0400A0E1           MOV      R0,R4
+   \   00000198   4F0000EA           B        ??USBDDriver_RequestHandler_16
+    598                              USBD_Stall(0);
+    599                      }
+    600                      break;
+    601          
+    602                  case USBGenericRequest_CLEARFEATURE:
+    603                      TRACE_INFO_WP("cFeat ");
+    604          
+    605                      // Check which is the requested feature
+    606                      switch (USBFeatureRequest_GetFeatureSelector(pRequest)) {
+   \                     ??USBDDriver_RequestHandler_17:
+   \   0000019C   0600A0E1           MOV      R0,R6
+   \   000001A0   ........           BL       USBFeatureRequest_GetFeatureSelector
+   \   000001A4   000050E3           CMP      R0,#+0
+   \   000001A8   0200000A           BEQ      ??USBDDriver_RequestHandler_18
+   \   000001AC   010050E3           CMP      R0,#+1
+   \   000001B0   0900000A           BEQ      ??USBDDriver_RequestHandler_19
+   \   000001B4   0F0000EA           B        ??USBDDriver_RequestHandler_20
+    607          
+    608                          case USBFeatureRequest_ENDPOINTHALT:
+    609                              TRACE_INFO_WP("Hlt ");
+    610          
+    611                              // Unhalt endpoint and send a zero-length packet
+    612                              USBD_Unhalt(USBGenericRequest_GetEndpointNumber(pRequest));
+   \                     ??USBDDriver_RequestHandler_18:
+   \   000001B8   0600A0E1           MOV      R0,R6
+   \   000001BC   ........           BL       USBGenericRequest_GetEndpointNumber
+   \   000001C0   ........           BL       USBD_Unhalt
+    613                              USBD_Write(0, 0, 0, 0, 0);
+   \                     ??USBDDriver_RequestHandler_21:
+   \   000001C4   0000A0E3           MOV      R0,#+0
+   \   000001C8   00008DE5           STR      R0,[SP, #+0]
+   \   000001CC   0030A0E3           MOV      R3,#+0
+   \   000001D0   0020A0E3           MOV      R2,#+0
+   \   000001D4   0010A0E3           MOV      R1,#+0
+   \   000001D8   ACFFFFEA           B        ??USBDDriver_RequestHandler_6
+    614                              break;
+    615          
+    616                          case USBFeatureRequest_DEVICEREMOTEWAKEUP:
+    617                              TRACE_INFO_WP("RmWU ");
+    618          
+    619                              // Disable remote wake-up and send a zero-length packet
+    620                              pDriver->isRemoteWakeUpEnabled = 0;
+   \                     ??USBDDriver_RequestHandler_19:
+   \   000001DC   0980C5E5           STRB     R8,[R5, #+9]
+    621                              USBD_Write(0, 0, 0, 0, 0);
+   \                     ??USBDDriver_RequestHandler_22:
+   \   000001E0   0000A0E3           MOV      R0,#+0
+   \   000001E4   00008DE5           STR      R0,[SP, #+0]
+   \   000001E8   0030A0E3           MOV      R3,#+0
+   \   000001EC   0020A0E3           MOV      R2,#+0
+   \   000001F0   0010A0E3           MOV      R1,#+0
+   \   000001F4   A5FFFFEA           B        ??USBDDriver_RequestHandler_6
+    622                              break;
+    623          
+    624                          default:
+    625                              TRACE_WARNING(
+    626                                        "USBDDriver_RequestHandler: Unknown feature selector (%d)\n\r",
+    627                                        USBFeatureRequest_GetFeatureSelector(pRequest));
+   \                     ??USBDDriver_RequestHandler_20:
+   \   000001F8   0600A0E1           MOV      R0,R6
+   \   000001FC   ........           BL       USBFeatureRequest_GetFeatureSelector
+   \   00000200   0010A0E1           MOV      R1,R0
+   \   00000204   380084E2           ADD      R0,R4,#+56
+   \   00000208   330000EA           B        ??USBDDriver_RequestHandler_16
+    628                              USBD_Stall(0);
+    629                      }
+    630                      break;
+    631          
+    632              case USBGenericRequest_SETFEATURE:
+    633                  TRACE_INFO_WP("sFeat ");
+    634          
+    635                  // Check which is the selected feature
+    636                  switch (USBFeatureRequest_GetFeatureSelector(pRequest)) {
+   \                     ??USBDDriver_RequestHandler_23:
+   \   0000020C   0600A0E1           MOV      R0,R6
+   \   00000210   ........           BL       USBFeatureRequest_GetFeatureSelector
+   \   00000214   000050E3           CMP      R0,#+0
+   \   00000218   0300000A           BEQ      ??USBDDriver_RequestHandler_24
+   \   0000021C   010050E3           CMP      R0,#+1
+   \   00000220   0500001A           BNE      ??USBDDriver_RequestHandler_25
+    637          
+    638                      case USBFeatureRequest_DEVICEREMOTEWAKEUP:
+    639                          TRACE_INFO_WP("RmWU ");
+    640          
+    641                          // Enable remote wake-up and send a ZLP
+    642                          pDriver->isRemoteWakeUpEnabled = 1;
+   \   00000224   0990C5E5           STRB     R9,[R5, #+9]
+    643                          USBD_Write(0, 0, 0, 0, 0);
+   \   00000228   E5FFFFEA           B        ??USBDDriver_RequestHandler_21
+    644                          break;
+    645          
+    646                      case USBFeatureRequest_ENDPOINTHALT:
+    647                          TRACE_INFO_WP("Halt ");
+    648                          // Halt endpoint
+    649                          USBD_Halt(USBGenericRequest_GetEndpointNumber(pRequest));
+   \                     ??USBDDriver_RequestHandler_24:
+   \   0000022C   0600A0E1           MOV      R0,R6
+   \   00000230   ........           BL       USBGenericRequest_GetEndpointNumber
+   \   00000234   ........           BL       USBD_Halt
+    650                          USBD_Write(0, 0, 0, 0, 0);
+   \   00000238   E8FFFFEA           B        ??USBDDriver_RequestHandler_22
+    651                          break;
+    652          
+    653          #if defined(BOARD_USB_UDPHS) || defined(BOARD_USB_OTGHS)
+    654          
+    655                      case USBFeatureRequest_TESTMODE:
+    656                          // 7.1.20 Test Mode Support
+    657                          if ((USBGenericRequest_GetType(pRequest) == USBGenericRequest_DEVICE)
+    658                              && ((USBGenericRequest_GetIndex(pRequest) & 0x000F) == 0)) {
+    659          
+    660                              // Handle test request
+    661                              USBDDriver_Test(USBFeatureRequest_GetTestSelector(pRequest));
+    662                          }
+    663                          else {
+    664          
+    665                              USBD_Stall(0);
+    666                          }
+    667                          break;
+    668          #endif
+    669          #if defined(BOARD_USB_OTGHS)
+    670                      case USBFeatureRequest_OTG_B_HNP_ENABLE:
+    671                              TRACE_INFO_WP("OTG_B_HNP_ENABLE ");
+    672                              otg_features_supported |= 1<<USBFeatureRequest_OTG_B_HNP_ENABLE;
+    673                              USBD_Write(0, 0, 0, 0, 0);
+    674                          break;
+    675                      case USBFeatureRequest_OTG_A_HNP_SUPPORT:
+    676                              TRACE_INFO_WP("OTG_A_HNP_SUPPORT ");
+    677                              otg_features_supported |= 1<<USBFeatureRequest_OTG_A_HNP_SUPPORT;
+    678                              USBD_Write(0, 0, 0, 0, 0);
+    679                          break;
+    680                      case USBFeatureRequest_OTG_A_ALT_HNP_SUPPORT:
+    681                              TRACE_INFO_WP("OTG_A_ALT_HNP_SUPPORT ");
+    682                              otg_features_supported |= 1<<USBFeatureRequest_OTG_A_ALT_HNP_SUPPORT;
+    683                              USBD_Write(0, 0, 0, 0, 0);
+    684                          break;
+    685          #endif
+    686                      default:
+    687                          TRACE_WARNING(
+    688                                    "USBDDriver_RequestHandler: Unknown feature selector (%d)\n\r",
+    689                                    USBFeatureRequest_GetFeatureSelector(pRequest));
+   \                     ??USBDDriver_RequestHandler_25:
+   \   0000023C   0600A0E1           MOV      R0,R6
+   \   00000240   ........           BL       USBFeatureRequest_GetFeatureSelector
+   \   00000244   0010A0E1           MOV      R1,R0
+   \   00000248   380084E2           ADD      R0,R4,#+56
+   \   0000024C   220000EA           B        ??USBDDriver_RequestHandler_16
+    690                          USBD_Stall(0);
+    691                  }
+    692                  break;
+    693          
+    694              case USBGenericRequest_SETINTERFACE:
+    695                  TRACE_INFO_WP("sInterface ");
+    696          
+    697                  infnum = USBInterfaceRequest_GetInterface(pRequest);
+   \                     ??USBDDriver_RequestHandler_26:
+   \   00000250   0600A0E1           MOV      R0,R6
+   \   00000254   ........           BL       USBInterfaceRequest_GetInterface
+   \   00000258   0040A0E1           MOV      R4,R0
+    698                  setting = USBInterfaceRequest_GetAlternateSetting(pRequest);
+    699                  SetInterface(pDriver, infnum, setting);
+   \   0000025C   0600A0E1           MOV      R0,R6
+   \   00000260   ........           BL       USBInterfaceRequest_GetAlternateSetting
+   \   00000264   041095E5           LDR      R1,[R5, #+4]
+   \   00000268   000051E3           CMP      R1,#+0
+   \   0000026C   1B00000A           BEQ      ??USBDDriver_RequestHandler_15
+   \   00000270   0130D4E7           LDRB     R3,[R4, +R1]
+   \   00000274   000053E1           CMP      R3,R0
+   \   00000278   0300000A           BEQ      ??USBDDriver_RequestHandler_27
+   \   0000027C   0100C4E7           STRB     R0,[R4, +R1]
+   \   00000280   0010A0E1           MOV      R1,R0
+   \   00000284   0400A0E1           MOV      R0,R4
+   \   00000288   ........           BL       USBDDriverCallbacks_InterfaceSettingChanged
+   \                     ??USBDDriver_RequestHandler_27:
+   \   0000028C   0000A0E3           MOV      R0,#+0
+   \   00000290   00008DE5           STR      R0,[SP, #+0]
+   \   00000294   0030A0E3           MOV      R3,#+0
+   \   00000298   0020A0E3           MOV      R2,#+0
+   \   0000029C   0010A0E3           MOV      R1,#+0
+   \   000002A0   7AFFFFEA           B        ??USBDDriver_RequestHandler_6
+    700                  break;
+    701          
+    702              case USBGenericRequest_GETINTERFACE:
+    703                  TRACE_INFO_WP("gInterface ");
+    704          
+    705                  infnum = USBInterfaceRequest_GetInterface(pRequest);
+   \                     ??USBDDriver_RequestHandler_28:
+   \   000002A4   0600A0E1           MOV      R0,R6
+   \   000002A8   ........           BL       USBInterfaceRequest_GetInterface
+    706                  GetInterface(pDriver, infnum);
+   \   000002AC   041095E5           LDR      R1,[R5, #+4]
+   \   000002B0   000051E3           CMP      R1,#+0
+   \   000002B4   0900000A           BEQ      ??USBDDriver_RequestHandler_15
+   \   000002B8   00808DE5           STR      R8,[SP, #+0]
+   \   000002BC   0030A0E3           MOV      R3,#+0
+   \   000002C0   0120A0E3           MOV      R2,#+1
+   \   000002C4   011080E0           ADD      R1,R0,R1
+   \   000002C8   6FFFFFEA           B        ??USBDDriver_RequestHandler_5
+    707                  break;
+    708          
+    709              default:
+    710                  TRACE_WARNING(
+    711                            "USBDDriver_RequestHandler: Unknown request code (%d)\n\r",
+    712                            USBGenericRequest_GetRequest(pRequest));
+   \                     ??USBDDriver_RequestHandler_1:
+   \   000002CC   0600A0E1           MOV      R0,R6
+   \   000002D0   ........           BL       USBGenericRequest_GetRequest
+   \   000002D4   0010A0E1           MOV      R1,R0
+   \   000002D8   780084E2           ADD      R0,R4,#+120
+   \                     ??USBDDriver_RequestHandler_16:
+   \   000002DC   ........           BL       printf
+    713                  USBD_Stall(0);
+   \                     ??USBDDriver_RequestHandler_15:
+   \   000002E0   0000A0E3           MOV      R0,#+0
+   \   000002E4   ........           BL       USBD_Stall
+    714              }
+    715          }
+   \                     ??USBDDriver_RequestHandler_3:
+   \   000002E8   F143BDE8           POP      {R0,R4-R9,LR}
+   \   000002EC   1EFF2FE1           BX       LR               ;; return
+    716          
+    717          
+    718          //------------------------------------------------------------------------------
+    719          /// Test if RemoteWakeUP feature is enabled
+    720          /// \param pDriver  Pointer to an USBDDriver instance.
+    721          /// \return 1 if remote wake up has been enabled by the host; otherwise, returns
+    722          /// 0
+    723          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+    724          unsigned char USBDDriver_IsRemoteWakeUpEnabled(const USBDDriver *pDriver)
+    725          {
+    726              return pDriver->isRemoteWakeUpEnabled;
+   \                     USBDDriver_IsRemoteWakeUpEnabled:
+   \   00000000   0900D0E5           LDRB     R0,[R0, #+9]
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+    727          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1:
+   \   00000000   ........           DC32     TerminateCtrlInWithNull
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1_1:
+   \   00000000   ........           DC32     `?<Constant "-W- USBDDriver_GetDes...">`
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1_2:
+   \   00000000   ........           DC32     `?<Constant "-W- USBDDriver_Reques...">`
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1_3:
+   \   00000000   ........           DC32     USBD_SetAddress
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ??DataTable1_4:
+   \   00000000   ........           DC32     ??data
+
+   \                                 In section .rodata, align 4
+   \                     `?<Constant "-W- USBDDriver_GetDes...">`:
+   \   00000000   2D572D205553       DC8 2DH, 57H, 2DH, 20H, 55H, 53H, 42H, 44H
+   \              4244        
+   \   00000008   447269766572       DC8 44H, 72H, 69H, 76H, 65H, 72H, 5FH, 47H
+   \              5F47        
+   \   00000010   657444657363       DC8 65H, 74H, 44H, 65H, 73H, 63H, 72H, 69H
+   \              7269        
+   \   00000018   70746F723A20       DC8 70H, 74H, 6FH, 72H, 3AH, 20H, 55H, 6EH
+   \              556E        
+   \   00000020   6B6E6F776E20       DC8 6BH, 6EH, 6FH, 77H, 6EH, 20H, 64H, 65H
+   \              6465        
+   \   00000028   736372697074       DC8 73H, 63H, 72H, 69H, 70H, 74H, 6FH, 72H
+   \              6F72        
+   \   00000030   207479706520       DC8 20H, 74H, 79H, 70H, 65H, 20H, 28H, 25H
+   \              2825        
+   \   00000038   64290A0D00         DC8 64H, 29H, 0AH, 0DH, 0
+   \   0000003D   000000             DC8 0, 0, 0
+
+   \                                 In section .rodata, align 4
+   \                     `?<Constant "-W- USBDDriver_Reques...">`:
+   \   00000000   2D572D205553       DC8 2DH, 57H, 2DH, 20H, 55H, 53H, 42H, 44H
+   \              4244        
+   \   00000008   447269766572       DC8 44H, 72H, 69H, 76H, 65H, 72H, 5FH, 52H
+   \              5F52        
+   \   00000010   657175657374       DC8 65H, 71H, 75H, 65H, 73H, 74H, 48H, 61H
+   \              4861        
+   \   00000018   6E646C65723A       DC8 6EH, 64H, 6CH, 65H, 72H, 3AH, 20H, 55H
+   \              2055        
+   \   00000020   6E6B6E6F776E       DC8 6EH, 6BH, 6EH, 6FH, 77H, 6EH, 20H, 72H
+   \              2072        
+   \   00000028   656369706965       DC8 65H, 63H, 69H, 70H, 69H, 65H, 6EH, 74H
+   \              6E74        
+   \   00000030   20282564290A       DC8 20H, 28H, 25H, 64H, 29H, 0AH, 0DH, 0
+   \              0D00        
+   \   00000038   2D572D205553       DC8 2DH, 57H, 2DH, 20H, 55H, 53H, 42H, 44H
+   \              4244        
+   \   00000040   447269766572       DC8 44H, 72H, 69H, 76H, 65H, 72H, 5FH, 52H
+   \              5F52        
+   \   00000048   657175657374       DC8 65H, 71H, 75H, 65H, 73H, 74H, 48H, 61H
+   \              4861        
+   \   00000050   6E646C65723A       DC8 6EH, 64H, 6CH, 65H, 72H, 3AH, 20H, 55H
+   \              2055        
+   \   00000058   6E6B6E6F776E       DC8 6EH, 6BH, 6EH, 6FH, 77H, 6EH, 20H, 66H
+   \              2066        
+   \   00000060   656174757265       DC8 65H, 61H, 74H, 75H, 72H, 65H, 20H, 73H
+   \              2073        
+   \   00000068   656C6563746F       DC8 65H, 6CH, 65H, 63H, 74H, 6FH, 72H, 20H
+   \              7220        
+   \   00000070   282564290A0D       DC8 28H, 25H, 64H, 29H, 0AH, 0DH, 0
+   \              00          
+   \   00000077   00                 DC8 0
+   \   00000078   2D572D205553       DC8 2DH, 57H, 2DH, 20H, 55H, 53H, 42H, 44H
+   \              4244        
+   \   00000080   447269766572       DC8 44H, 72H, 69H, 76H, 65H, 72H, 5FH, 52H
+   \              5F52        
+   \   00000088   657175657374       DC8 65H, 71H, 75H, 65H, 73H, 74H, 48H, 61H
+   \              4861        
+   \   00000090   6E646C65723A       DC8 6EH, 64H, 6CH, 65H, 72H, 3AH, 20H, 55H
+   \              2055        
+   \   00000098   6E6B6E6F776E       DC8 6EH, 6BH, 6EH, 6FH, 77H, 6EH, 20H, 72H
+   \              2072        
+   \   000000A0   657175657374       DC8 65H, 71H, 75H, 65H, 73H, 74H, 20H, 63H
+   \              2063        
+   \   000000A8   6F6465202825       DC8 6FH, 64H, 65H, 20H, 28H, 25H, 64H, 29H
+   \              6429        
+   \   000000B0   0A0D00             DC8 0AH, 0DH, 0
+   \   000000B3   00                 DC8 0
+    728          
+    729          #if defined(BOARD_USB_OTGHS)
+    730          //------------------------------------------------------------------------------
+    731          /// Return OTG features supported
+    732          /// \return the OTG features
+    733          //------------------------------------------------------------------------------
+    734          unsigned char USBDDriver_returnOTGFeatures(void)
+    735          {
+    736              return otg_features_supported;
+    737          }
+    738          
+    739          //------------------------------------------------------------------------------
+    740          /// Clear OTG features supported
+    741          /// \return none
+    742          //------------------------------------------------------------------------------
+    743          void USBDDriver_clearOTGFeatures(void)
+    744          {
+    745              otg_features_supported = 0;
+    746          }
+    747          #endif
+    748          
+
+   Maximum stack usage in bytes:
+
+     Function                       .cstack
+     --------                       -------
+     GetDescriptor                      48
+     SetConfiguration                   40
+     TerminateCtrlInWithNull             8
+     USBDDriver_Initialize               4
+     USBDDriver_IsRemoteWakeUpEnabled
+                                         0
+     USBDDriver_RequestHandler          32
+
+
+   Section sizes:
+
+     Function/Label                         Bytes
+     --------------                         -----
+     TerminateCtrlInWithNull                  36
+     SetConfiguration                        152
+     data                                      4
+     data
+     GetDescriptor                           508
+     USBDDriver_Initialize                    56
+     USBDDriver_RequestHandler               752
+     USBDDriver_IsRemoteWakeUpEnabled
+                                               8
+     ??DataTable1                              4
+     ??DataTable1_1                            4
+     ??DataTable1_2                            4
+     ??DataTable1_3                            4
+     ??DataTable1_4                            4
+     ?<Constant "-W- USBDDriver_GetDes...">   64
+     ?<Constant "-W- USBDDriver_Reques...">  180
+
+ 
+     4 bytes in section .bss
+   244 bytes in section .rodata
+ 1 532 bytes in section .text
+ 
+ 1 532 bytes of CODE  memory
+   244 bytes of CONST memory
+     4 bytes of DATA  memory
+
+Errors: none
+Warnings: none

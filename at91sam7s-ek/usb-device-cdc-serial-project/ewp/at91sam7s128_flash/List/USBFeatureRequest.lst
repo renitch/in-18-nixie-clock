@@ -1,0 +1,162 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:52 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BFeatureRequest.c                                        #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\US #
+#                    BFeatureRequest.c -D at91sam7s128 -D flash -D            #
+#                    TRACE_LEVEL=3 -lC C:\Projects\in-18-nixie-clock\at91sam7 #
+#                    s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flas #
+#                    h\List\ --remarks --diag_suppress Pe826,Pe1375 -o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\USBFeatureR #
+#                    equest.lst                                               #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBFeatureRe #
+#                    quest.o                                                  #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\common\core\USBFeatureRequest.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          /*
+     31              Title: USBFeatureRequest implementation
+     32          
+     33              About: Purpose
+     34                  Implementation of the USBFeatureRequest class.
+     35          */
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Headers
+     39          //------------------------------------------------------------------------------
+     40          
+     41          #include "USBFeatureRequest.h"
+     42          
+     43          //------------------------------------------------------------------------------
+     44          //         Exported functions
+     45          //------------------------------------------------------------------------------
+     46          
+     47          //------------------------------------------------------------------------------
+     48          /// Returns the feature selector of a given CLEAR_FEATURE or SET_FEATURE
+     49          /// request.
+     50          /// \param request Pointer to a USBGenericRequest instance.
+     51          /// \return Feature selector.
+     52          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     53          unsigned char USBFeatureRequest_GetFeatureSelector(
+     54              const USBGenericRequest *request)
+     55          {
+   \                     USBFeatureRequest_GetFeatureSelector:
+   \   00000000   00502DE9           PUSH     {R12,LR}
+     56              return USBGenericRequest_GetValue(request);
+   \   00000004   ........           BL       USBGenericRequest_GetValue
+   \   00000008   FF0000E2           AND      R0,R0,#0xFF
+   \   0000000C   ........           B        ?Subroutine0
+     57          }
+
+   \                                 In section .text, align 4, keep-with-next
+   \                     ?Subroutine0:
+   \   00000000   0240BDE8           POP      {R1,LR}
+   \   00000004   1EFF2FE1           BX       LR               ;; return
+     58          
+     59          //------------------------------------------------------------------------------
+     60          /// Indicates the test that the device must undertake following a
+     61          /// SET_FEATURE request.
+     62          /// \param request Pointer to a USBGenericRequest instance.
+     63          /// \return Test selector.
+     64          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     65          unsigned char USBFeatureRequest_GetTestSelector(
+     66              const USBGenericRequest *request)
+     67          {
+   \                     USBFeatureRequest_GetTestSelector:
+   \   00000000   00502DE9           PUSH     {R12,LR}
+     68              return (USBGenericRequest_GetIndex(request) >> 8) & 0xFF;
+   \   00000004   ........           BL       USBGenericRequest_GetIndex
+   \   00000008   2004A0E1           LSR      R0,R0,#+8
+   \   0000000C                      REQUIRE ?Subroutine0
+   \   0000000C                      ;; // Fall through to label ?Subroutine0
+     69          }
+     70          
+
+   Maximum stack usage in bytes:
+
+     Function                       .cstack
+     --------                       -------
+     USBFeatureRequest_GetFeatureSelector
+                                         8
+     USBFeatureRequest_GetTestSelector
+                                         8
+
+
+   Section sizes:
+
+     Function/Label                 Bytes
+     --------------                 -----
+     USBFeatureRequest_GetFeatureSelector
+                                      16
+     ?Subroutine0                      8
+     USBFeatureRequest_GetTestSelector
+                                      12
+
+ 
+ 36 bytes in section .text
+ 
+ 36 bytes of CODE memory
+
+Errors: none
+Warnings: none

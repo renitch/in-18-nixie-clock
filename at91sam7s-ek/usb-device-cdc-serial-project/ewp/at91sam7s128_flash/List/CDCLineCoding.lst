@@ -1,0 +1,248 @@
+###############################################################################
+#                                                                             #
+# IAR ANSI C/C++ Compiler V5.50.0.51878/W32 for ARM     14/Mar/2021  19:14:51 #
+# Copyright (C) 1999-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Cpu mode     =  arm                                                      #
+#    Endian       =  little                                                   #
+#    Source file  =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\cdc\CDC #
+#                    LineCoding.c                                             #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91lib\usb\common\cdc\CDC #
+#                    LineCoding.c -D at91sam7s128 -D flash -D TRACE_LEVEL=3   #
+#                    -lC C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\at91sam7s128_flash\List\        #
+#                    --remarks --diag_suppress Pe826,Pe1375 -o                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\ --debug     #
+#                    --endian=little --cpu=ARM7TDMI -e --fpu=None             #
+#                    --dlib_config "C:\Program Files (x86)\IAR                #
+#                    Systems\Embedded Workbench 5.4\arm\INC\DLib_Config_Full. #
+#                    h" -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\..\..\..\at91lib/peripherals\ #
+#                     -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-devic #
+#                    e-cdc-serial-project\ewp\..\..\..\at91lib/components\    #
+#                    -I C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device #
+#                    -cdc-serial-project\ewp\..\..\..\at91lib/usb/device\ -I  #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib\ -I                #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\external_libs\ -I          #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\..\..\..\at91lib/boards/at91sam7s-e #
+#                    k\ -I "C:\Program Files (x86)\IAR Systems\Embedded       #
+#                    Workbench 5.4\arm\INC\" --interwork --cpu_mode arm -Ohz  #
+#    List file    =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\CDCLineCodi #
+#                    ng.lst                                                   #
+#    Object file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\CDCLineCodin #
+#                    g.o                                                      #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+C:\Projects\in-18-nixie-clock\at91lib\usb\common\cdc\CDCLineCoding.c
+      1          /* ----------------------------------------------------------------------------
+      2           *         ATMEL Microcontroller Software Support 
+      3           * ----------------------------------------------------------------------------
+      4           * Copyright (c) 2008, Atmel Corporation
+      5           *
+      6           * All rights reserved.
+      7           *
+      8           * Redistribution and use in source and binary forms, with or without
+      9           * modification, are permitted provided that the following conditions are met:
+     10           *
+     11           * - Redistributions of source code must retain the above copyright notice,
+     12           * this list of conditions and the disclaimer below.
+     13           *
+     14           * Atmel's name may not be used to endorse or promote products derived from
+     15           * this software without specific prior written permission.
+     16           *
+     17           * DISCLAIMER: THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR
+     18           * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+     19           * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+     20           * DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR ANY DIRECT, INDIRECT,
+     21           * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     22           * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+     23           * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+     24           * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+     25           * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+     26           * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     27           * ----------------------------------------------------------------------------
+     28           */
+     29          
+     30          /*
+     31              Title: CDCLineCoding
+     32          
+     33              About: Purpose
+     34                  Implementation of the CDCLineCoding class.
+     35          */
+     36          
+     37          //------------------------------------------------------------------------------
+     38          //         Headers
+     39          //------------------------------------------------------------------------------
+     40          
+     41          #include "CDCLineCoding.h"
+     42          #include <utility/assert.h>
+     43          
+     44          //------------------------------------------------------------------------------
+     45          //         Exported functions
+     46          //------------------------------------------------------------------------------
+     47          
+     48          //------------------------------------------------------------------------------
+     49          /// Initializes the bitrate, number of stop bits, parity checking and
+     50          /// number of data bits of a CDCLineCoding object.
+     51          /// \param lineCoding Pointer to a CDCLineCoding instance.
+     52          /// \param bitrate Bitrate of the virtual COM connection.
+     53          /// \param stopbits Number of stop bits ("CDC LineCoding StopBits").
+     54          /// \param parity Parity check type ("CDC LineCoding ParityChecking").
+     55          /// \param databits Number of data bits.
+     56          //------------------------------------------------------------------------------
+
+   \                                 In section .text, align 4, keep-with-next
+     57          void CDCLineCoding_Initialize(CDCLineCoding *lineCoding,
+     58                                        unsigned int bitrate,
+     59                                        unsigned char stopbits,
+     60                                        unsigned char parity,
+     61                                        unsigned char databits)
+     62          {
+   \                     CDCLineCoding_Initialize:
+   \   00000000   F0412DE9           PUSH     {R4-R8,LR}
+   \   00000004   0040A0E1           MOV      R4,R0
+   \   00000008   0100A0E1           MOV      R0,R1
+   \   0000000C   0250A0E1           MOV      R5,R2
+   \   00000010   0360A0E1           MOV      R6,R3
+   \   00000014   1870DDE5           LDRB     R7,[SP, #+24]
+     63              ASSERT(stopbits <= CDCLineCoding_TWOSTOPBITS,
+     64                     "CDCLineCoding_Initialize: Invalid stopbits value (%d)\n\r",
+     65                     stopbits);
+   \   00000018   88809FE5           LDR      R8,??CDCLineCoding_Initialize_0
+   \   0000001C   030055E3           CMP      R5,#+3
+   \   00000020   0500003A           BCC      ??CDCLineCoding_Initialize_1
+   \   00000024   0800A0E1           MOV      R0,R8
+   \   00000028   ........           BL       printf
+   \   0000002C   0510A0E1           MOV      R1,R5
+   \   00000030   100088E2           ADD      R0,R8,#+16
+   \   00000034   ........           BL       printf
+   \                     ??CDCLineCoding_Initialize_2:
+   \   00000038   FEFFFFEA           B        ??CDCLineCoding_Initialize_2
+     66              ASSERT(parity <= CDCLineCoding_SPACEPARITY,
+     67                     "CDCLineCoding_Initialize: Invalid parity value (%d)\n\r",
+     68                     parity);
+   \                     ??CDCLineCoding_Initialize_1:
+   \   0000003C   050056E3           CMP      R6,#+5
+   \   00000040   0500003A           BCC      ??CDCLineCoding_Initialize_3
+   \   00000044   0800A0E1           MOV      R0,R8
+   \   00000048   ........           BL       printf
+   \   0000004C   0610A0E1           MOV      R1,R6
+   \   00000050   480088E2           ADD      R0,R8,#+72
+   \   00000054   ........           BL       printf
+   \                     ??CDCLineCoding_Initialize_4:
+   \   00000058   FEFFFFEA           B        ??CDCLineCoding_Initialize_4
+     69              ASSERT(((databits >= 5) && (databits <= 8)) || (databits == 16),
+     70                     "CDCLineCoding_Initialize: Invalid databits value (%d)\n\r",
+     71                     databits);
+   \                     ??CDCLineCoding_Initialize_3:
+   \   0000005C   051047E2           SUB      R1,R7,#+5
+   \   00000060   FF1001E2           AND      R1,R1,#0xFF
+   \   00000064   040051E3           CMP      R1,#+4
+   \   00000068   0700003A           BCC      ??CDCLineCoding_Initialize_5
+   \   0000006C   100057E3           CMP      R7,#+16
+   \   00000070   0500000A           BEQ      ??CDCLineCoding_Initialize_5
+   \   00000074   0800A0E1           MOV      R0,R8
+   \   00000078   ........           BL       printf
+   \   0000007C   0710A0E1           MOV      R1,R7
+   \   00000080   800088E2           ADD      R0,R8,#+128
+   \   00000084   ........           BL       printf
+   \                     ??CDCLineCoding_Initialize_6:
+   \   00000088   FEFFFFEA           B        ??CDCLineCoding_Initialize_6
+     72          
+     73              lineCoding->dwDTERate = bitrate;
+   \                     ??CDCLineCoding_Initialize_5:
+   \   0000008C   0410A0E1           MOV      R1,R4
+   \   00000090   ........           BL       __aeabi_uwrite4
+     74              lineCoding->bCharFormat = stopbits;
+   \   00000094   0450C4E5           STRB     R5,[R4, #+4]
+     75              lineCoding->bParityType = parity;
+   \   00000098   0560C4E5           STRB     R6,[R4, #+5]
+     76              lineCoding->bDataBits = databits;
+   \   0000009C   0670C4E5           STRB     R7,[R4, #+6]
+     77          }
+   \   000000A0   F041BDE8           POP      {R4-R8,LR}
+   \   000000A4   1EFF2FE1           BX       LR               ;; return
+   \                     ??CDCLineCoding_Initialize_0:
+   \   000000A8   ........           DC32     `?<Constant "-F- ASSERT: ">`
+
+   \                                 In section .rodata, align 4
+   \                     `?<Constant "-F- ASSERT: ">`:
+   \   00000000   2D462D204153       DC8 "-F- ASSERT: "
+   \              534552543A20
+   \              00          
+   \   0000000D   000000             DC8 0, 0, 0
+   \   00000010   4344434C696E       DC8 43H, 44H, 43H, 4CH, 69H, 6EH, 65H, 43H
+   \              6543        
+   \   00000018   6F64696E675F       DC8 6FH, 64H, 69H, 6EH, 67H, 5FH, 49H, 6EH
+   \              496E        
+   \   00000020   697469616C69       DC8 69H, 74H, 69H, 61H, 6CH, 69H, 7AH, 65H
+   \              7A65        
+   \   00000028   3A20496E7661       DC8 3AH, 20H, 49H, 6EH, 76H, 61H, 6CH, 69H
+   \              6C69        
+   \   00000030   642073746F70       DC8 64H, 20H, 73H, 74H, 6FH, 70H, 62H, 69H
+   \              6269        
+   \   00000038   74732076616C       DC8 74H, 73H, 20H, 76H, 61H, 6CH, 75H, 65H
+   \              7565        
+   \   00000040   20282564290A       DC8 20H, 28H, 25H, 64H, 29H, 0AH, 0DH, 0
+   \              0D00        
+   \   00000048   4344434C696E       DC8 43H, 44H, 43H, 4CH, 69H, 6EH, 65H, 43H
+   \              6543        
+   \   00000050   6F64696E675F       DC8 6FH, 64H, 69H, 6EH, 67H, 5FH, 49H, 6EH
+   \              496E        
+   \   00000058   697469616C69       DC8 69H, 74H, 69H, 61H, 6CH, 69H, 7AH, 65H
+   \              7A65        
+   \   00000060   3A20496E7661       DC8 3AH, 20H, 49H, 6EH, 76H, 61H, 6CH, 69H
+   \              6C69        
+   \   00000068   642070617269       DC8 64H, 20H, 70H, 61H, 72H, 69H, 74H, 79H
+   \              7479        
+   \   00000070   2076616C7565       DC8 20H, 76H, 61H, 6CH, 75H, 65H, 20H, 28H
+   \              2028        
+   \   00000078   2564290A0D00       DC8 25H, 64H, 29H, 0AH, 0DH, 0
+   \   0000007E   0000               DC8 0, 0
+   \   00000080   4344434C696E       DC8 43H, 44H, 43H, 4CH, 69H, 6EH, 65H, 43H
+   \              6543        
+   \   00000088   6F64696E675F       DC8 6FH, 64H, 69H, 6EH, 67H, 5FH, 49H, 6EH
+   \              496E        
+   \   00000090   697469616C69       DC8 69H, 74H, 69H, 61H, 6CH, 69H, 7AH, 65H
+   \              7A65        
+   \   00000098   3A20496E7661       DC8 3AH, 20H, 49H, 6EH, 76H, 61H, 6CH, 69H
+   \              6C69        
+   \   000000A0   642064617461       DC8 64H, 20H, 64H, 61H, 74H, 61H, 62H, 69H
+   \              6269        
+   \   000000A8   74732076616C       DC8 74H, 73H, 20H, 76H, 61H, 6CH, 75H, 65H
+   \              7565        
+   \   000000B0   20282564290A       DC8 20H, 28H, 25H, 64H, 29H, 0AH, 0DH, 0
+   \              0D00        
+     78          
+
+   Maximum stack usage in bytes:
+
+     Function                 .cstack
+     --------                 -------
+     CDCLineCoding_Initialize     24
+
+
+   Section sizes:
+
+     Function/Label             Bytes
+     --------------             -----
+     CDCLineCoding_Initialize    172
+     ?<Constant "-F- ASSERT: ">  184
+
+ 
+ 184 bytes in section .rodata
+ 172 bytes in section .text
+ 
+ 172 bytes of CODE  memory
+ 184 bytes of CONST memory
+
+Errors: none
+Warnings: none

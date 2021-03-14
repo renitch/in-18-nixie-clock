@@ -1,0 +1,521 @@
+###############################################################################
+#                                                                             #
+# IAR ELF Linker V5.50.0.51878/W32 for ARM              14/Mar/2021  19:14:53 #
+# Copyright (C) 2007-2010 IAR Systems AB.                                     #
+#                                                                             #
+#    Output file  =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Exe\at91sam7s128 #
+#                    _flash.out                                               #
+#    Map file     =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\at91sam7s12 #
+#                    8_flash.map                                              #
+#    Command line =  C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\CDCDSerialDr #
+#                    iver.o C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-de #
+#                    vice-cdc-serial-project\ewp\at91sam7s128_flash\Obj\CDCDS #
+#                    erialDriverDescriptors.o C:\Projects\in-18-nixie-clock\a #
+#                    t91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s1 #
+#                    28_flash\Obj\CDCLineCoding.o                             #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\CDCSetContro #
+#                    lLineStateRequest.o C:\Projects\in-18-nixie-clock\at91sa #
+#                    m7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_fl #
+#                    ash\Obj\USBConfigurationDescriptor.o                     #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBDCallback #
+#                    s_Initialized.o C:\Projects\in-18-nixie-clock\at91sam7s- #
+#                    ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\ #
+#                    Obj\USBDCallbacks_Reset.o C:\Projects\in-18-nixie-clock\ #
+#                    at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s #
+#                    128_flash\Obj\USBDDriver.o C:\Projects\in-18-nixie-clock #
+#                    \at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7 #
+#                    s128_flash\Obj\USBDDriverCb_CfgChanged.o                 #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBDDriverCb #
+#                    _IfSettingChanged.o C:\Projects\in-18-nixie-clock\at91sa #
+#                    m7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_fl #
+#                    ash\Obj\USBD_OTGHS.o C:\Projects\in-18-nixie-clock\at91s #
+#                    am7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_f #
+#                    lash\Obj\USBD_UDP.o C:\Projects\in-18-nixie-clock\at91sa #
+#                    m7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_fl #
+#                    ash\Obj\USBD_UDPHS.o C:\Projects\in-18-nixie-clock\at91s #
+#                    am7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_f #
+#                    lash\Obj\USBEndpointDescriptor.o                         #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBFeatureRe #
+#                    quest.o C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-d #
+#                    evice-cdc-serial-project\ewp\at91sam7s128_flash\Obj\USBG #
+#                    enericDescriptor.o C:\Projects\in-18-nixie-clock\at91sam #
+#                    7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_fla #
+#                    sh\Obj\USBGenericRequest.o C:\Projects\in-18-nixie-clock #
+#                    \at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7 #
+#                    s128_flash\Obj\USBGetDescriptorRequest.o                 #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\USBInterface #
+#                    Request.o C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb #
+#                    -device-cdc-serial-project\ewp\at91sam7s128_flash\Obj\US #
+#                    BSetAddressRequest.o C:\Projects\in-18-nixie-clock\at91s #
+#                    am7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_f #
+#                    lash\Obj\USBSetConfigurationRequest.o                    #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\aic.o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\board_cstart #
+#                    up_iar.o C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb- #
+#                    device-cdc-serial-project\ewp\at91sam7s128_flash\Obj\boa #
+#                    rd_lowlevel.o C:\Projects\in-18-nixie-clock\at91sam7s-ek #
+#                    \usb-device-cdc-serial-project\ewp\at91sam7s128_flash\Ob #
+#                    j\board_memories.o C:\Projects\in-18-nixie-clock\at91sam #
+#                    7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_fla #
+#                    sh\Obj\cp15.o C:\Projects\in-18-nixie-clock\at91sam7s-ek #
+#                    \usb-device-cdc-serial-project\ewp\at91sam7s128_flash\Ob #
+#                    j\cp15_asm_iar.o C:\Projects\in-18-nixie-clock\at91sam7s #
+#                    -ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash #
+#                    \Obj\dbgu.o C:\Projects\in-18-nixie-clock\at91sam7s-ek\u #
+#                    sb-device-cdc-serial-project\ewp\at91sam7s128_flash\Obj\ #
+#                    led.o C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-dev #
+#                    ice-cdc-serial-project\ewp\at91sam7s128_flash\Obj\main.o #
+#                     C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-c #
+#                    dc-serial-project\ewp\at91sam7s128_flash\Obj\pio.o       #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\pio_it.o     #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\pmc.o        #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\trace.o      #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\Obj\usart.o      #
+#                    --redirect _Printf=_PrintfSmall --redirect               #
+#                    _Scanf=_ScanfSmall -o C:\Projects\in-18-nixie-clock\at91 #
+#                    sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_ #
+#                    flash\Exe\at91sam7s128_flash.out --map                   #
+#                    C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cd #
+#                    c-serial-project\ewp\at91sam7s128_flash\List\at91sam7s12 #
+#                    8_flash.map --config C:\Projects\in-18-nixie-clock\at91s #
+#                    am7s-ek\usb-device-cdc-serial-project\ewp\..\..\..\at91l #
+#                    ib\boards\at91sam7s-ek\at91sam7s128\flash                #
+#                    --diag_suppress Lp005,Lp006 --semihosting --entry        #
+#                    resetHandler                                             #
+#                                                                             #
+#                                                                             #
+###############################################################################
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"P1":  place in [from 0x00100000 to 0x001000ff] { section .cstartup };
+"P2":  place in [from 0x00100100 to 0x0011ffff] { ro };
+"P3":  place in [from 0x00200000 to 0x002000ff] { section .vectors };
+"P4":  place in [from 0x00200100 to 0x00207fff] {
+          rw, block IRQ_STACK, block SYS_STACK, block CSTACK, block HEAP };
+
+  Section            Kind        Address    Size  Object
+  -------            ----        -------    ----  ------
+"P1":                                       0x4c
+  .cstartup          ro code  0x00100000    0x4c  board_cstartup_iar.o [1]
+                            - 0x0010004c    0x4c
+
+"P2":                                     0x2785
+  .text              ro code  0x00100100   0xb30  xprintfsmall.o [3]
+  .text              ro code  0x00100c30   0x6f0  main.o [1]
+  .text              ro code  0x00101320   0x1d4  I32DivMod.o [4]
+  .text              ro code  0x001014f4   0x178  board_lowlevel.o [1]
+  .text              ro code  0x0010166c   0x16c  pio.o [1]
+  .text              ro code  0x001017d8   0x154  xxmemxmalloc.o [3]
+  .text              ro code  0x0010192c   0x110  xxmemxfree.o [3]
+  .text              ro code  0x00101a3c    0xe0  pio_it.o [1]
+  .text              ro code  0x00101b1c    0xe0  cppinit.o [3]
+  .text              ro code  0x00101bfc    0xd4  ABImemcpy.o [4]
+  .text              ro code  0x00101cd0    0xc4  xsyslock.o [3]
+  .text              ro code  0x00101d94    0xba  packbits_init3.o [4]
+  .rodata            const    0x00101e50    0xac  main.o [1]
+  .text              ro code  0x00101efc    0x94  memchr.o [4]
+  .text              ro code  0x00101f90    0x8c  xencoding_sb.o [3]
+  .text              ro code  0x0010201c    0x84  dbgu.o [1]
+  .text              ro code  0x001020a0    0x7c  ABImemset.o [4]
+  .text              ro code  0x0010211c    0x68  usart.o [1]
+  .text              ro code  0x00102184    0x58  board_memories.o [1]
+  .text              ro code  0x001021dc    0x54  data_init3.o [4]
+  .text              ro code  0x00102230    0x54  strlen.o [4]
+  .text              ro code  0x00102284    0x4c  aic.o [1]
+  .text              ro code  0x001022d0    0x4c  strncmp.o [3]
+  .text              ro code  0x0010231c    0x4c  MtxWrapper.o [3]
+  .rodata            const    0x00102368    0x48  main.o [1]
+  .text              ro code  0x001023b0    0x48  trace.o [1]
+  .text              ro code  0x001023f8    0x48  iarttio.o [5]
+  .text              ro code  0x00102440    0x40  xgetmemchunk.o [3]
+  .text              ro code  0x00102480    0x38  printf.o [3]
+  .text              ro code  0x001024b8    0x34  xmbtowc.o [3]
+  .rodata            const    0x001024ec    0x30  led.o [1]
+  .text              ro code  0x0010251c    0x30  led.o [1]
+  .text              ro code  0x0010254c    0x2c  setlocale.o [3]
+  .text              ro code  0x00102578    0x28  memset.o [3]
+  .text              ro code  0x001025a0    0x28  xprout.o [3]
+  .text              ro code  0x001025c8    0x28  xwctomb.o [3]
+  .text              ro code  0x001025f0    0x28  zero_init3.o [4]
+  .text              ro code  0x00102618    0x24  cmain.o [4]
+  .iar.init_table    const    0x0010263c    0x48  - Linker created -
+  .text              ro code  0x00102684    0x20  exit.o [5]
+  .text              ro code  0x001026a4    0x20  strchr.o [4]
+  .rodata            const    0x001026c4    0x18  main.o [1]
+  .text              ro code  0x001026dc    0x14  xmbcurmax.o [3]
+  .text              ro code  0x001026f0    0x14  cexit.o [4]
+  .rodata            const    0x00102704    0x10  xprintfsmall.o [3]
+  .text              ro code  0x00102714     0xc  XShttio.o [3]
+  .rodata            const    0x00102720     0x8  xprintfsmall.o [3]
+  .rodata            const    0x00102728     0x8  xencoding_sb.o [3]
+  .rodata            const    0x00102730     0x8  xencoding_sb.o [3]
+  .text              ro code  0x00102738     0x8  low_level_init.o [3]
+  .text              ro code  0x00102740     0x8  exit.o [3]
+  .text              ro code  0x00102748     0x4  vectortrap.o [4]
+  .text              ro code  0x0010274c     0x4  IntDivZer.o [4]
+  .text              ro code  0x00102750     0x4  xreturnswi.o [5]
+  .rodata            const    0x00102754     0x1  setlocale.o [3]
+  Initializer bytes  ro data  0x00102755    0x92  <for P4 s0>
+  Initializer bytes  ro data  0x001027e7    0x9e  <for P3 s1>
+                            - 0x00102885  0x2785
+
+"P3":                                       0x9c
+  P3 s1                       0x00200000    0x9c  <Init block>
+    .vectors         inited   0x00200000    0x9c  board_cstartup_iar.o [1]
+                            - 0x0020009c    0x9c
+
+"P4", part 1 of 3:                        0x1240
+  CSTACK                      0x00200100  0x1000  <Block>
+    CSTACK           uninit   0x00200100  0x1000  <Block tail>
+  .iar.dynexit                0x00201100   0x1e0  <Block>
+    .iar.dynexit     uninit   0x00201100     0xc  cppinit.o [3]
+    .iar.dynexit     uninit   0x0020110c   0x1d4  <Block tail>
+  IRQ_STACK                   0x002012e0    0x60  <Block>
+    IRQ_STACK        uninit   0x002012e0    0x60  <Block tail>
+  HEAP                        0x00201340     0x0  <Block>
+                            - 0x00201340  0x1240
+
+"P4", part 2 of 3:                         0x180
+  P4 s0                       0x00201340   0x180  <Init block>
+    .data            inited   0x00201340    0x80  setlocale.o [3]
+    .data            inited   0x002013c0    0x78  main.o [1]
+    .data            inited   0x00201438    0x40  xfiles.o [3]
+    .data            inited   0x00201478    0x40  xfiles.o [3]
+    .data            inited   0x002014b8     0x8  XShttio.o [3]
+                            - 0x002014c0   0x180
+
+"P4", part 3 of 3:                         0x518
+  .bss               zero     0x002014c0   0x408  main.o [1]
+  .bss               zero     0x002018c8    0x50  xfiles.o [3]
+  .bss               zero     0x00201918    0x50  xfiles.o [3]
+  .bss               zero     0x00201968    0x3c  pio_it.o [1]
+  .bss               zero     0x002019a4    0x14  xsyslock.o [3]
+  .bss               zero     0x002019b8     0x8  xxmemxmalloc.o [3]
+  .bss               zero     0x002019c0     0x4  xgetmemchunk.o [3]
+  .bss               zero     0x002019c4     0x4  cppinit.o [3]
+  .bss               zero     0x002019c8     0x4  MtxWrapper.o [3]
+  .bss               zero     0x002019cc     0x4  MtxWrapper.o [3]
+  .bss               zero     0x002019d0     0x4  MtxWrapper.o [3]
+  .bss               zero     0x002019d4     0x4  MtxWrapper.o [3]
+                            - 0x002019d8   0x518
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address     Size
+          -------     ----
+Zero (__iar_zero_init3)
+    1 destination range, total size 0x518:
+          0x002014c0  0x518
+
+Copy/packbits (__iar_packbits_init3)
+    1 source range, total size 0x92 (38% of destination):
+          0x00102755   0x92
+    1 destination range, total size 0x180:
+          0x00201340  0x180
+
+Copy/packbits (__iar_packbits_init3)
+    1 source range, total size 0x9e (101% of destination):
+          0x001027e7   0x9e
+    1 destination range, total size 0x9c:
+          0x00200000   0x9c
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module                ro code  rw code  ro data  rw data
+    ------                -------  -------  -------  -------
+C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\Obj: [1]
+    aic.o                      76
+    board_cstartup_iar.o       76      156      158
+    board_lowlevel.o          376
+    board_memories.o           88
+    dbgu.o                    132
+    led.o                      48                48
+    main.o                  1 776               314    1 152
+    pio.o                     364
+    pio_it.o                  224                         60
+    trace.o                    72
+    usart.o                   104
+    --------------------------------------------------------
+    Total:                  3 336      156      520    1 212
+
+command line: [2]
+    --------------------------------------------------------
+    Total:
+
+dl4t_al_if.a: [3]
+    MtxWrapper.o               76                         16
+    XShttio.o                  12                 4        8
+    cppinit.o                 224                         16
+    exit.o                      8
+    low_level_init.o            8
+    memset.o                   40
+    printf.o                   56
+    setlocale.o                44                49      128
+    strncmp.o                  76
+    xencoding_sb.o            140                16
+    xfiles.o                                     48      288
+    xgetmemchunk.o             64                          4
+    xmbcurmax.o                20
+    xmbtowc.o                  52
+    xprintfsmall.o          2 864                24
+    xprout.o                   40
+    xsyslock.o                196                         20
+    xwctomb.o                  40
+    xxmemxfree.o              272
+    xxmemxmalloc.o            340                          8
+    --------------------------------------------------------
+    Total:                  4 572               141      488
+
+rt4t_al.a: [4]
+    ABImemcpy.o               212
+    ABImemset.o               124
+    I32DivMod.o               468
+    IntDivZer.o                 4
+    cexit.o                    20
+    cmain.o                    36
+    data_init3.o               84
+    memchr.o                  148
+    packbits_init3.o          186
+    strchr.o                   32
+    strlen.o                   84
+    vectortrap.o                4
+    zero_init3.o               40
+    --------------------------------------------------------
+    Total:                  1 442
+
+shs_l.a: [5]
+    exit.o                     32
+    iarttio.o                  72
+    xreturnswi.o                4
+    --------------------------------------------------------
+    Total:                    108
+
+    Gaps                                          2
+    Linker created                               72    4 660
+------------------------------------------------------------
+    Grand Total:            9 458      156      735    6 360
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                      Address   Size  Type      Object
+-----                      -------   ----  ----      ------
+.iar.dynexit$$Base      0x00201100          --   Gb  - Linker created -
+.iar.dynexit$$Limit     0x002012e0          --   Gb  - Linker created -
+?main                   0x00102618         Code  Gb  cmain.o [4]
+Abort_Handler           0x00102748         Code  Wk  vectortrap.o [4]
+BOARD_GetRemap          0x00102184   0x38  Code  Lc  board_memories.o [1]
+BOARD_RemapRam          0x001021bc    0xc  Code  Gb  board_memories.o [1]
+CSTACK$$Base            0x00200100          --   Gb  - Linker created -
+CSTACK$$Limit           0x00201100          --   Gb  - Linker created -
+DBGU_Configure          0x0010201c   0x58  Code  Gb  dbgu.o [1]
+DBGU_PutChar            0x00102074   0x2c  Code  Gb  dbgu.o [1]
+DtorRecArray            0x00201100    0xc  Data  Lc  cppinit.o [3]
+FIQ_Handler             0x00102748         Code  Wk  vectortrap.o [4]
+HEAP$$Base              0x00201340          --   Gb  - Linker created -
+HEAP$$Limit             0x00201340          --   Gb  - Linker created -
+IRQ_ConfigureIT         0x00102284   0x30  Code  Gb  aic.o [1]
+IRQ_EnableIT            0x001022b4   0x10  Code  Gb  aic.o [1]
+IRQ_Handler             0x00102748         Code  Wk  vectortrap.o [4]
+IRQ_STACK$$Base         0x002012e0          --   Gb  - Linker created -
+IRQ_STACK$$Limit        0x00201340          --   Gb  - Linker created -
+InitUSART1              0x00100c4c   0x6c  Code  Gb  main.o [1]
+IsLeapYear              0x00100d68   0x34  Code  Gb  main.o [1]
+LED_Configure           0x0010251c   0x24  Code  Gb  led.o [1]
+LowLevelInit            0x00101500  0x15c  Code  Gb  board_lowlevel.o [1]
+MonthDay                0x00100da4   0xac  Code  Gb  main.o [1]
+PIO_Clear               0x001017c8   0x10  Code  Gb  pio.o [1]
+PIO_Configure           0x0010166c  0x14c  Code  Gb  pio.o [1]
+PIO_IT_InterruptHandler
+                        0x00101a3c   0x84  Code  Gb  pio_it.o [1]
+PIO_InitializeInterrupts
+                        0x00101ac0   0x54  Code  Gb  pio_it.o [1]
+PIO_Set                 0x001017b8   0x10  Code  Gb  pio.o [1]
+Prefetch_Handler        0x00102748         Code  Wk  vectortrap.o [4]
+Region$$Table$$Base     0x0010263c          --   Gb  - Linker created -
+Region$$Table$$Limit    0x00102684          --   Gb  - Linker created -
+SWI_Handler             0x00102748         Code  Wk  vectortrap.o [4]
+USART_Configure         0x0010211c   0x3c  Code  Gb  usart.o [1]
+USART_SetReceiverEnabled
+                        0x00102168    0xc  Code  Gb  usart.o [1]
+USART_SetTransmitterEnabled
+                        0x00102158   0x10  Code  Gb  usart.o [1]
+Undefined_Handler       0x00102748         Code  Wk  vectortrap.o [4]
+_EncodingSb_Mbtowc      0x00101fc4   0x50  Code  Gb  xencoding_sb.o [3]
+_EncodingSb_Wctomb      0x00101f90   0x34  Code  Gb  xencoding_sb.o [3]
+_IsdstStr               0x00201364    0x4  Data  Gb  setlocale.o [3]
+_LitobSmall             0x00100a8c  0x144  Code  Lc  xprintfsmall.o [3]
+_LocaleEncoding         0x0010254c   0x28  Code  Gb  setlocale.o [3]
+_LocaleReturnString     0x00201370   0x50  Data  Lc  setlocale.o [3]
+_Locale_Profile         0x00201340   0x1c  Data  Gb  setlocale.o [3]
+_Mbtowc                 0x001024b8   0x34  Code  Gb  xmbtowc.o [3]
+_PrintfSmall            0x00100100  0x614  Code  Gb  xprintfsmall.o [3]
+_Prout                  0x001025a0   0x28  Code  Gb  xprout.o [3]
+_PutcharsSmall          0x00100bd0   0x60  Code  Lc  xprintfsmall.o [3]
+_PutstrSmall            0x0010071c  0x364  Code  Lc  xprintfsmall.o [3]
+_TzoneStr               0x0020135c    0x4  Data  Gb  setlocale.o [3]
+_Wctomb                 0x001025c8   0x28  Code  Gb  xwctomb.o [3]
+__ICFEDIT_region_RAM_end__
+                        0x00207fff          --   Gb  command line/config [2]
+__ICFEDIT_region_RAM_start__
+                        0x00200000          --   Gb  command line/config [2]
+__ICFEDIT_region_ROM_end__
+                        0x0011ffff          --   Gb  command line/config [2]
+__ICFEDIT_region_ROM_start__
+                        0x00100000          --   Gb  command line/config [2]
+__ICFEDIT_size_cstack__
+                        0x00001000          --   Gb  command line/config [2]
+__ICFEDIT_size_heap__   0x00000000          --   Gb  command line/config [2]
+__ICFEDIT_size_irqstack__
+                        0x00000060          --   Gb  command line/config [2]
+__ICFEDIT_size_startup__
+                        0x00000100          --   Gb  command line/config [2]
+__ICFEDIT_size_sysstack__
+                        0x00000060          --   Gb  command line/config [2]
+__ICFEDIT_size_vectors__
+                        0x00000100          --   Gb  command line/config [2]
+__aeabi_idiv            0x00101320         Code  Gb  I32DivMod.o [4]
+__aeabi_idiv0           0x0010274c         Code  Gb  IntDivZer.o [4]
+__aeabi_idivmod         0x00101320         Code  Gb  I32DivMod.o [4]
+__aeabi_memcpy          0x00101bfc         Code  Gb  ABImemcpy.o [4]
+__aeabi_memcpy4         0x00101c20         Code  Gb  ABImemcpy.o [4]
+__aeabi_memcpy8         0x00101c20         Code  Gb  ABImemcpy.o [4]
+__aeabi_memset          0x001020a0         Code  Gb  ABImemset.o [4]
+__aeabi_uidiv           0x00101330         Code  Gb  I32DivMod.o [4]
+__aeabi_uidivmod        0x00101330         Code  Gb  I32DivMod.o [4]
+__call_dtors            0x00101b74    0x8  Code  Gb  cppinit.o [3]
+__cmain                 0x00102618         Code  Gb  cmain.o [4]
+__cstart_call_dtors     0x001026f4         Code  Gb  cexit.o [4]
+__cxa_atexit            0x00101b1c   0x58  Code  Gb  cppinit.o [3]
+__cxa_finalize          0x00101b7c   0x74  Code  Gb  cppinit.o [3]
+__data_Aldata           0x002019b8    0x8  Data  Gb  xxmemxmalloc.o [3]
+__data_GetMemChunk      0x00102440   0x40  Code  Gb  xgetmemchunk.o [3]
+__exit                  0x00102684   0x20  Code  Gb  exit.o [5]
+__iar_Locksyslock       0x00101cfc   0x6c  Code  Gb  xsyslock.o [3]
+__iar_Mbcurmax          0x001026dc   0x14  Code  Gb  xmbcurmax.o [3]
+__iar_Memchr            0x00101efc         Code  Gb  memchr.o [4]
+__iar_Memset            0x001020a0         Code  Gb  ABImemset.o [4]
+__iar_Memset_word       0x001020ac         Code  Gb  ABImemset.o [4]
+__iar_Mtxdst            0x00102324    0x4  Code  Gb  MtxWrapper.o [3]
+__iar_Mtxinit           0x0010231c    0x8  Code  Gb  MtxWrapper.o [3]
+__iar_Mtxlock           0x00102348    0x8  Code  Gb  MtxWrapper.o [3]
+__iar_Mtxunlock         0x00102350    0x8  Code  Gb  MtxWrapper.o [3]
+__iar_Stderr            0x00201478   0x40  Data  Gb  xfiles.o [3]
+__iar_Stdout            0x00201438   0x40  Data  Gb  xfiles.o [3]
+__iar_Strchr            0x001026a4         Code  Gb  strchr.o [4]
+__iar_Tls_setup__IsdstStr
+                        0x00201368    0x4  Data  Gb  setlocale.o [3]
+__iar_Tls_setup__Locale_Profile
+                        0x0020136c    0x4  Data  Gb  setlocale.o [3]
+__iar_Tls_setup__TzoneStr
+                        0x00201360    0x4  Data  Gb  setlocale.o [3]
+__iar_Unlocksyslock     0x00101d68   0x24  Code  Gb  xsyslock.o [3]
+__iar_close_ttio        0x001023f8   0x48  Code  Gb  iarttio.o [5]
+__iar_data_init3        0x001021dc   0x54  Code  Gb  data_init3.o [4]
+__iar_lookup_ttioh      0x00102714    0xc  Code  Gb  XShttio.o [3]
+__iar_packbits_init3    0x00101d95   0xba  Code  Gb  packbits_init3.o [4]
+__iar_return_from_swi   0x00102750    0x4  Code  Gb  xreturnswi.o [5]
+__iar_ttio_handles      0x002014b8    0x8  Data  Lc  XShttio.o [3]
+__iar_zero_init3        0x001025f1   0x28  Code  Gb  zero_init3.o [4]
+__low_level_init        0x00102738    0x8  Code  Gb  low_level_init.o [3]
+_call_main              0x00102628         Code  Gb  cmain.o [4]
+_exit                   0x001026f0         Code  Gb  cexit.o [4]
+_main                   0x00102630         Code  Gb  cmain.o [4]
+clearlocks              0x00101cd0   0x2c  Code  Lc  xsyslock.o [3]
+correctTimezone         0x00100e50   0x70  Code  Gb  main.o [1]
+currentBufferIndex      0x002014c0    0x4  Data  Lc  main.o [1]
+defaultFiqHandler       0x001014f8    0x4  Code  Gb  board_lowlevel.o [1]
+defaultIrqHandler       0x001014fc    0x4  Code  Gb  board_lowlevel.o [1]
+defaultSpuriousHandler  0x001014f4    0x4  Code  Gb  board_lowlevel.o [1]
+delay                   0x00100c30   0x1c  Code  Gb  main.o [1]
+ebuf                    0x002018c8   0x50  Data  Lc  xfiles.o [3]
+exit                    0x00102740    0x8  Code  Gb  exit.o [3]
+extractTime             0x00100f44  0x214  Code  Gb  main.o [1]
+fputc                   0x001023b0   0x38  Code  Gb  trace.o [1]
+free                    0x0010192c  0x10c  Code  Gb  xxmemxfree.o [3]
+globalDay               0x002013c8    0x4  Data  Gb  main.o [1]
+globalHours             0x002013cc    0x4  Data  Gb  main.o [1]
+globalMinutes           0x002013d0    0x4  Data  Gb  main.o [1]
+globalMonth             0x002013c4    0x4  Data  Gb  main.o [1]
+globalSeconds           0x002013d4    0x4  Data  Gb  main.o [1]
+globalYear              0x002013c0    0x4  Data  Gb  main.o [1]
+gpsBuffer               0x002014c8  0x400  Data  Lc  main.o [1]
+hoursHI                 0x002013d8   0x10  Data  Gb  main.o [1]
+hoursLO                 0x002013e8   0x10  Data  Gb  main.o [1]
+irqHandler              0x00200034         Code  Gb  board_cstartup_iar.o [1]
+isGPSCommand            0x002014c4    0x4  Data  Lc  main.o [1]
+main                    0x00101238   0xcc  Code  Gb  main.o [1]
+malloc                  0x001017d8  0x150  Code  Gb  xxmemxmalloc.o [3]
+memchr                  0x00101efc         Code  Gb  memchr.o [4]
+memset                  0x00102578   0x28  Code  Gb  memset.o [3]
+minutesHI               0x002013f8   0x10  Data  Gb  main.o [1]
+minutesLO               0x00201408   0x10  Data  Gb  main.o [1]
+mtx                     0x002019a8   0x10  Data  Lc  xsyslock.o [3]
+mtxdst                  0x002019cc    0x4  Data  Lc  MtxWrapper.o [3]
+mtxinit                 0x002019c8    0x4  Data  Lc  MtxWrapper.o [3]
+mtxlock                 0x002019d0    0x4  Data  Lc  MtxWrapper.o [3]
+mtxunlock               0x002019d4    0x4  Data  Lc  MtxWrapper.o [3]
+next_abi_dtor_rec       0x002019c4    0x4  Data  Lc  cppinit.o [3]
+numSources              0x002019a0    0x4  Data  Lc  pio_it.o [1]
+obuf                    0x00201918   0x50  Data  Lc  xfiles.o [3]
+pSources                0x00201968   0x38  Data  Lc  pio_it.o [1]
+pinClk                  0x00101ee4    0xc  Data  Lc  main.o [1]
+pinData                 0x00101ed8    0xc  Data  Lc  main.o [1]
+pinLatch                0x00101ef0    0xc  Data  Lc  main.o [1]
+pinsLeds                0x001024ec   0x30  Data  Lc  led.o [1]
+pinsUsart1              0x001026c4   0x18  Data  Lc  main.o [1]
+printf                  0x00102480   0x38  Code  Gb  printf.o [3]
+processChar             0x00100ec0   0x84  Code  Gb  main.o [1]
+putchar                 0x001023e8    0x8  Code  Gb  trace.o [1]
+read_char_USART1_nonstop
+                        0x00100cb8   0x24  Code  Gb  main.o [1]
+resetHandler            0x00100000         Code  Gb  board_cstartup_iar.o [1]
+resetVector             0x00200000         Code  Gb  board_cstartup_iar.o [1]
+secondsHI               0x00201418   0x10  Data  Gb  main.o [1]
+secondsLO               0x00201428   0x10  Data  Gb  main.o [1]
+showTime                0x00101158   0xe0  Code  Gb  main.o [1]
+strchr                  0x001026a4         Code  Gb  strchr.o [4]
+strlen                  0x00102230         Code  Gb  strlen.o [4]
+strncmp                 0x001022d0   0x4c  Code  Gb  strncmp.o [3]
+syslock_o               0x002019a4    0x4  Data  Lc  xsyslock.o [3]
+writeByte               0x00100cdc   0x8c  Code  Gb  main.o [1]
+
+
+[1] = C:\Projects\in-18-nixie-clock\at91sam7s-ek\usb-device-cdc-serial-project\ewp\at91sam7s128_flash\Obj
+[2] = command line
+[3] = dl4t_al_if.a
+[4] = rt4t_al.a
+[5] = shs_l.a
+
+  9 458 bytes of readonly  code memory
+    156 bytes of readwrite code memory
+    735 bytes of readonly  data memory
+  6 360 bytes of readwrite data memory
+
+Errors: none
+Warnings: none
